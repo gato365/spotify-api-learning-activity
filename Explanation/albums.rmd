@@ -1,28 +1,215 @@
-# Initializes 
+```{r | get_album function}
+# Initializes a function to get a dataframe of album data, taking in the spotify album id, an optional country market, and a personalized authorization code
 get_album <- function(id,
                       market = NULL,
-                      authorization = get_spotify_access_token()
+                      authorization = get_spotify_access_token() # This function is explained below; generates an acces token
                       ) {
-
+# Initializes a variable for the base api call url
     base_url <- 'https://api.spotify.com/v1/albums'
-
+# If statement for if a market was specified
     if (!is.null(market)) {
+# If a market is specified, detect if its in the correct format
         if (str_detect(market, '^[[:alpha:]]{2}$')) {
+# If not in the correct format, stop and provide this message
             stop('"market" must be an ISO 3166-1 alpha-2 country code')
         }
     }
+# Initializes a list of parameters including the market and authorization code
+    params <- list(market = market, 
+                   access_token = authorization)
+# Initializes a variable called url that glues the base api url and the id given in the parameters
+    url <- str_glue('{base_url}/{id}')
+# Uses the RETRY function to make a get call to the api url and recieves it in a json format
+    res <- RETRY('GET', url, query = params, encode = 'json')
+# If the call makes an error, returns the error so the user knows what is going wrong
+    stop_for_status(res)
+# Changes the data from json format to a dataframe
+    res <- fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+# Returns the new dataframe of album data
+    return(res)
+}
+```
 
+```{r | get_albums function}
+# Initializes a function to get a dataframe of data from multiple albums, taking in the Spotify album IDs, optional country market, authorization code, and optional parameter on if to include meta data
+get_albums <- function(ids,
+                       market = NULL,
+                       authorization = get_spotify_access_token(), # This function is explained below; generates an acces token
+                       include_meta_info = FALSE) {
+# Initializes a variable for the base api call url
+    base_url <- 'https://api.spotify.com/v1/albums'
+# If statement for if a market was specified
+    if (!is.null(market)) {
+# If a market is specified, detect if its in the correct format
+        if (str_detect(market, '^[[:alpha:]]{2}$')) {
+# If not in the correct format, stop and provide this message
+            stop('"market" must be an ISO 3166-1 alpha-2 country code')
+        }
+    }
+# Initializes a list of parameters including a string of the ids, the market, and the authorization code
     params <- list(
+        ids = paste(ids, collapse = ','),
         market = market,
         access_token = authorization
     )
-    url <- str_glue('{base_url}/{id}')
-    res <- RETRY('GET', url, query = params, encode = 'json')
+# Uses the RETRY function to make a get call to the api url and recieves it in a json format
+    res <- RETRY('GET', base_url, query = params, encode = 'json')
+# If the call makes an error, returns the error so the user knows what is going wrong
     stop_for_status(res)
-
+# Changes the data from json format to a dataframe
     res <- fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
-
+# Checks if include_meta_info is true or false
+    if (!include_meta_info) {
+# If it is false, only include the albums portion of the dataframe
+        res <- res$albums
+    }
+# Returns the new dataframe of album data
     return(res)
 }
+```
 
+```{r | get_album_tracks}
+# Initializes a function to return a dataframe of album tracks, taking in Spotify album id, the maximum number of tracks to return, the index of the first track wanted, a country market, an authorization code, and a parameter to include meta data
+get_album_tracks <- function(id,
+                             limit = 20,
+                             offset = 0,
+                             market = NULL,
+                             authorization = get_spotify_access_token(), # This function is explained below; generates an acces token
+                             include_meta_info = FALSE) {
+# Initializes a variable for the base api call url
+    base_url <- 'https://api.spotify.com/v1/albums'
+# If statement for if a market was specified
+    if (!is.null(market)) {
+# If a market is specified, detect if its in the correct format
+        if (str_detect(market, '^[[:alpha:]]{2}$')) {
+# If not in the correct format, stop and provide this message
+            stop('"market" must be an ISO 3166-1 alpha-2 country code')
+        }
+    }
+# Initializes a list of parameters including the market, the starting index, the maximum number of tracks, and the access token
+    params <- list(
+        market = market,
+        offset = offset,
+        limit = limit,
+        access_token = authorization
+    )
+# Initializes a variable called url that glues the base api url and the id given in the parameters
+    url <- str_glue('{base_url}/{id}/tracks')
+# Uses the RETRY function to make a get call to the api url and recieves it in a json format
+    res <- RETRY('GET', url, query = params, encode = 'json')
+# If the call makes an error, returns the error so the user knows what is going wrong
+    stop_for_status(res)
+# Changes the data from json format to a dataframe
+    res <- fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+# Checks if include_meta_info is true or false
+    if (!include_meta_info) {
+# If it is false, only include the items portion of the dataframe
+        res <- res$items
+    }
+# Returns the new dataframe of album data
+    return(res)
+}
+```
 
+```{r | get_spotify_access_token function}
+library(tidyverse)
+library(spotifyr)
+# Initializes a function to generate an access token, taking in the client id and secret client id
+get_spotify_access_token <- function(client_id = Sys.getenv('SPOTIFY_CLIENT_ID'),
+                                     client_secret = Sys.getenv('SPOTIFY_CLIENT_SECRET')
+                                     ) {
+# Uses the RETRY function to make a post request to Spotify to gain a token
+    post <- RETRY('POST', 'https://accounts.spotify.com/api/token',
+                 accept_json(),
+                 authenticate(client_id, client_secret),
+                 body = list(grant_type = 'client_credentials'),
+                 encode = 'form', httr::config(http_version = 2)) %>%
+        content
+# Checks if an error was given from the post request
+    if (!is.null(post$error)) {
+# Stops the function if an error was returned and states what the error was
+        stop(str_glue('Could not authenticate with given Spotify credentials:\n\t{post$error_description}'))
+    }
+# Initializes the access token variable from the post request
+    access_token <- post$access_token
+# States the access token
+    access_token
+}
+```
+
+```{r | get_my_saved_albums function}
+# Initializes a function that returns users saved albums, taking in the maximum number of albums wanted, the index of the first album to return, the coutnry market, the authorization code, and a parameter on whether or not to include meta data
+get_my_saved_albums <- function(limit = 20,
+                                offset = 0,
+                                market = NULL,
+                                authorization = get_spotify_authorization_code(),
+                                include_meta_info = FALSE) {
+# Function to check if all parameters are valid ; Further explained below
+   validate_parameters(limit=limit,
+                       offset=offset,
+                       market=market,
+                       include_meta_info=include_meta_info )
+# Initializes a variable for the base api call url
+    base_url <- 'https://api.spotify.com/v1/me/albums'
+# If statement for if a market was specified
+    if (!is.null(market)) {
+# If a market is specified, detect if its in the correct format
+        if (str_detect(market, '^[[:alpha:]]{2}$')) {
+# If not in the correct format, stop and provide this message
+            stop('"market" must be an ISO 3166-1 alpha-2 country code')
+        }
+    }
+# Initializes a list of parameters, including the maximum number of albums wanted, the index of the first album, and the market
+    params <- list(
+        limit = limit,
+        offset = offset,
+        market = market
+    )
+# Uses the RETRY function to make a get call to the api url and recieves it in a json format
+    res <- RETRY('GET', base_url,
+                 query = params,
+                 config(token = authorization), encode = 'json')
+# If the call makes an error, returns the error so the user knows what is going wrong
+    stop_for_status(res)
+# Changes the data from json format to a dataframe
+    res <- fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+# Checks if include_meta_info is true or false
+    if (!include_meta_info) {
+# If it is false, only include the items portion of the dataframe
+        res <- res$items
+    }
+# Returns the new dataframe of album data
+    return(res)
+}
+```
+
+```{r | validate_parameters function}
+#Initializes the validate parameters function, which checks if parameters are valid
+validate_parameters <- function(artists_or_tracks = NULL, # Checks if its an artist or track
+                                artist_or_user = NULL, # Checks if its an artist or user
+                                market = NULL, # Checks what the market is
+                                country = NULL, # Checks the country
+                                limit = NULL, # Maximum number of wanted things
+                                offset = NULL, # Index of first thing
+                                locale = NULL, # Desired language
+                                volume_percent = NULL, # 0 to 100 volume to set
+                                time_range = NULL, # Time range of song
+                                position_ms = NULL, # Checks if greater than 0
+                                state = NULL, # Checks if valid state
+                                include_meta_info = NULL) # Checks if meta info should be included
+                                {
+
+    if(!is.null(artist_or_user)) validate_type_artist_or_user(artist_or_user)
+    if(!is.null(artists_or_tracks)) validate_type_artists_or_tracks(artists_or_tracks)
+    if(!is.null(limit)) validate_limit(limit)
+    if(!is.null(offset)) validate_offset(offset)
+    if(!is.null(market)) validate_market(market)
+    if(!is.null(country)) validate_country(country)
+    if(!is.null(locale)) validate_locale(locale)
+    if(!is.null(time_range)) validate_time_range(time_range)
+    if(!is.null(state)) validate_state(state)
+    if(!is.null(position_ms)) validate_position_ms(position_ms)
+    if(!is.null(include_meta_info)) validate_include_meta_info(include_meta_info)
+}
+
+```

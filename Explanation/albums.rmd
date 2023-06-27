@@ -2,7 +2,7 @@
 # Initializes a function to get a dataframe of album data, taking in the spotify album id, an optional country market, and a personalized authorization code
 get_album <- function(id,
                       market = NULL,
-                      authorization = get_spotify_access_token()
+                      authorization = get_spotify_access_token() # This function is explained below; generates an acces token
                       ) {
 # Initializes a variable for the base api call url
     base_url <- 'https://api.spotify.com/v1/albums'
@@ -34,7 +34,7 @@ get_album <- function(id,
 # Initializes a function to get a dataframe of data from multiple albums, taking in the Spotify album IDs, optional country market, authorization code, and optional parameter on if to include meta data
 get_albums <- function(ids,
                        market = NULL,
-                       authorization = get_spotify_access_token(),
+                       authorization = get_spotify_access_token(), # This function is explained below; generates an acces token
                        include_meta_info = FALSE) {
 # Initializes a variable for the base api call url
     base_url <- 'https://api.spotify.com/v1/albums'
@@ -74,7 +74,7 @@ get_album_tracks <- function(id,
                              limit = 20,
                              offset = 0,
                              market = NULL,
-                             authorization = get_spotify_access_token(),
+                             authorization = get_spotify_access_token(), # This function is explained below; generates an acces token
                              include_meta_info = FALSE) {
 # Initializes a variable for the base api call url
     base_url <- 'https://api.spotify.com/v1/albums'
@@ -108,5 +108,29 @@ get_album_tracks <- function(id,
     }
 # Returns the new dataframe of album data
     return(res)
+}
+```
+
+```{r | get_spotify_access_token function}
+# Initializes a function to generate an access token, taking in the client id and secret client id
+get_spotify_access_token <- function(client_id = Sys.getenv('SPOTIFY_CLIENT_ID'),
+                                     client_secret = Sys.getenv('SPOTIFY_CLIENT_SECRET')
+                                     ) {
+# Uses the RETRY function to make a post request to Spotify to gain a token
+    post <- RETRY('POST', 'https://accounts.spotify.com/api/token',
+                 accept_json(),
+                 authenticate(client_id, client_secret),
+                 body = list(grant_type = 'client_credentials'),
+                 encode = 'form', httr::config(http_version = 2)) %>%
+        content
+# Checks if an error was given from the post request
+    if (!is.null(post$error)) {
+# Stops the function if an error was returned and states what the error was
+        stop(str_glue('Could not authenticate with given Spotify credentials:\n\t{post$error_description}'))
+    }
+# Initializes the access token variable from the post request
+    access_token <- post$access_token
+# States the access token
+    access_token
 }
 ```

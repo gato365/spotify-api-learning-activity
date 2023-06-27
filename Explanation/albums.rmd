@@ -1,4 +1,4 @@
-# 
+# Initializes 
 get_album <- function(id,
                       market = NULL,
                       authorization = get_spotify_access_token()

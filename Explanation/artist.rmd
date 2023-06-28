@@ -1,2 +1,64 @@
+get_artist: Get Spotify catalog information for a single artist identified by their unique Spotify ID.
 
-Hey
+?RETRY
+```{r}
+#Chunk 1
+get_artist <- function(id,
+                       authorization = get_spotify_access_token()
+                       ) 
+```
+
+Insert arguments of id (The Spotify ID for an artist) and a valid access token from the Spotify Accounts service assigned to 
+"authorization". Access token argument defaults to spotifyr::get_spotify_access_token()). 
+get_spotify_access_token() takes environment varaibles "SPOTIFY_CLIENT_ID" assigned to "client_id" and "SPOTIFY_CLIENT_SECRET"
+assigned to "client_secret".
+
+```{r}
+#Chunk 2
+                       {
+
+    base_url <- 'https://api.spotify.com/v1/artists'
+```
+
+Assign base_url to webpage that is an enpoint that stores that results of the HTTP request ?
+find out what v1 means, always going to be https://api.spotify.com/v1 with something at the end.
+
+```{r}
+#Chunk 3
+    params <- list(
+        access_token = authorization
+    )
+```
+
+Assign "params" to a list of access tokens created by the "get_spotify_access_token" from chunk 1.
+Output from "authorization" is assigned to "access_token".
+
+```{r}
+#Chunk 4
+    url <- str_glue('{base_url}/{id}')
+```
+
+The function "str_glue" concatenates the string values stored in base_url and id and the new 
+value is assigned to the "url" variable.
+
+```{r}
+#Chunk 5
+    res <- RETRY(verb = 'GET', url,
+                 query = params,
+                 encode = 'json',
+                 terminate_on = c(401, 403, 404)
+                 )
+```
+
+RETRY function is part of the httr package. RETRY takes in arguments verb, url, query, encode, and terminate_on.
+Verb specifies the HTTP method used to for request (eg: 'GET', 'POST', etc.). Url was contrsucted in chunk 4. 
+Query 
+
+```{r}
+    stop_for_status(res)
+
+    res <- fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+
+    res
+}
+```

@@ -1,0 +1,180 @@
+```{r}
+pitch_class_lookup <- c('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
+```
+
+```{r | scopes}
+scopes <- function() {
+    xml2::read_html("https://developer.spotify.com/documentation/general/guides/authorization/scopes/") %>%
+    rvest::html_elements('code') %>%
+    rvest::html_text() %>%
+    unique()
+    }
+```
+
+```{r | validate parameters}
+validate_parameters <- function(artists_or_tracks = NULL,
+                                artist_or_user = NULL,
+                                market = NULL,
+                                country = NULL,
+                                limit = NULL,
+                                offset = NULL,
+                                locale = NULL,
+                                volume_percent = NULL,
+                                time_range = NULL,
+                                position_ms = NULL,
+                                state = NULL) {
+
+    if(!is.null(artist_or_user)) validate_type_artist_or_user(artist_or_user)
+    if(!is.null(artists_or_tracks)) validate_type_artists_or_tracks(artists_or_tracks)
+    if(!is.null(limit)) validate_limit(limit)
+    if(!is.null(offset)) validate_offset(offset)
+    if(!is.null(market)) validate_market(market)
+    if(!is.null(country)) validate_country(country)
+    if(!is.null(locale)) validate_locale(locale)
+    if(!is.null(time_range)) validate_time_range(time_range)
+    if(!is.null(state)) validate_state(state)
+    if(!is.null(position_ms)) validate_position_ms(position_ms)
+}
+```
+
+```{r | validate artist or user}
+validate_type_artist_or_user <- function (artist_or_user) {
+
+     assertthat::assert_that(
+        artist_or_user %in% c("artist", "user"),
+        msg = "The type parameter must be either 'artists' or 'user'."
+    )
+
+}
+```
+
+```{r | validate artists or tracks}
+validate_type_artists_or_tracks <- function (artists_or_tracks) {
+
+    assertthat::assert_that(
+        artists_or_tracks %in% c("artists", "tracks"),
+        msg = "The type parameter must be either 'artists' or 'tracks'."
+    )
+
+}
+```
+
+```{r | validate limit}
+validate_limit <- function(limit) {
+
+    assertthat::assert_that(
+        is.numeric(limit),
+        msg = "The 'limit' parameter must be an integer value in the range of 1..50."
+    )
+
+    assertthat::assert_that(
+        limit>=1 & limit <=50 & limit%%1 ==0,
+        msg = "The 'limit' parameter must be an integer value in the range of 1..50."
+    )
+}
+```
+
+```{r | validate offset}
+validate_offset <- function(offset) {
+
+    assertthat::assert_that(
+        is.numeric(offset) & length(offset) == 1,
+        msg = "The 'offset' parameter must be an integer value in the range of 1..50."
+    )
+
+    assertthat::assert_that(
+        offset>=0 & offset <=10000 & offset%%1 ==0,
+        msg = "The 'offset' parameter must be an integer value in the range of 1..10000."
+    )
+}
+```
+
+```{r | validate position}
+validate_position_ms <- function(position_ms) {
+
+    assertthat::assert_that(
+        is.numeric(position_ms),
+        msg = "The 'position_ms' parameter must be an integer value that is greater than 0."
+    )
+
+    assertthat::assert_that(
+        position_ms> 0 & position_ms <=10000 & position_ms%%1 ==0,
+        msg = "The 'position_ms' parameter must be an integer value that is greater than 0."
+    )
+}
+```
+
+```{r | validate time range}
+validate_time_range <- function(time_range) {
+
+    assertthat::assert_that(
+        is.character(time_range) & length(time_range) == 1,
+        msg = "The 'time_range' parameter must be one of short_term', 'medium_term', 'long_term'."
+    )
+
+    assertthat::assert_that(
+        time_range %in% c('short_term', 'medium_term', 'long_term'),
+        msg = "The 'time_range' parameter must be one of short_term', 'medium_term', 'long_term'."
+    )
+}
+```
+
+```{r | validate volume percent}
+validate_volume_percent <- function(volume_percent) {
+
+    assertthat::assert_that(
+        is.numeric(volume_percent) & length(volume_percent) == 1,
+        msg = "The parameter 'volume_percent' must be a single integer value in the range  0,1,2...100."
+    )
+
+    assertthat::assert_that(
+        volume_percent %in% seq(0, 100),
+        msg = "The parameter 'volume_percent' must be a single integer value in the range  0,1,2...100."
+    )
+
+}
+```
+
+```{r | validate state}
+validate_state <- function(state) {
+
+    assertthat::assert_that(
+        is.character(state) & length(state) == 1,
+        msg = "The state parameter must be exactly one of 'track', 'context' or 'off'."
+    )
+
+    assertthat::assert_that(
+        state %in% c('track', 'context', 'off'),
+        msg = "The state parameter must be exactly one of 'track', 'context' or 'off'."
+    )
+}
+```
+
+```{r | validate market}
+validate_market <- function(market) {
+
+    assertthat::assert_that(
+        str_detect(market, '^[[:alpha:]]{2}$'),
+        msg = '"market" must be an ISO 3166-1 alpha-2 country code'
+        )
+}
+```
+
+```{r | validate country}
+validate_country <- function(country) {
+
+    assertthat::assert_that(
+        str_detect(country, '^[[:alpha:]]{2}$'),
+        msg = '"country" must be an ISO 3166-1 alpha-2 country code.'
+    )
+}
+```
+
+```{r | validate local}
+validate_locale <- function(locale) {
+    assertthat::assert_that(
+        is.character(locale) & nchar(locale) <= 5,
+        msg = "The parameter 'locale' must be an ISO_639-1 code as a character variable."
+    )
+}
+```

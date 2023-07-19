@@ -1,0 +1,182 @@
+```{r | new get_albums_tracks}
+get_albums_tracks <- function(ids, limit = 20, offset = 0, authorization = get_spotify_access_token()){
+    url <- "https://api.spotify.com/v1/albums"
+    parameters <- list(
+        ids = paste(ids, collapse = ","),
+        market = "US",
+        limit = limit,
+        offset = offset,
+        access_token = authorization
+    )
+    result = httr::RETRY(verb = "GET", url, query = parameters, encode = "json", terminate_on = c(401, 403, 404))
+    httr::stop_for_status(result)
+    result <- jsonlite::fromJSON(httr::content(result, as = "text", encoding = "UTF-8"), flatten = TRUE)
+    result$artists <- purrr::map(result$artists, ~ list(id = .x$id, name = .x$name))
+    result <- result$albums$tracks.items %>%
+            purrr::map_df(as.data.frame) %>%
+            dplyr::mutate(
+                artist_id = purrr::map_chr(artists, ~ toString(.x$id)),
+                artist_name = purrr::map_chr(artists, ~ toString(.x$name))
+                ) %>%
+            dplyr::select(-href,
+            -preview_url,
+            -uri,
+            -external_urls.spotify,
+            -is_local,
+            -artists) %>%
+            dplyr::rename(
+                track_id = id
+            )
+    result
+}
+```
+
+```{r | new get_tracks function}
+get_tracks <- function(ids, authorization = access_token){
+    url <- "https://api.spotify.com/v1/tracks"
+    parameters <- list(
+        ids = paste(ids, collapse = ","),
+        market = "US",
+        access_token = authorization
+    )
+    result = httr::RETRY(verb = "GET", url, query = parameters, encode = "json", terminate_on = c(401, 403, 404))
+    httr::stop_for_status(result)
+    result <- jsonlite::fromJSON(httr::content(result, as = "text", encoding = "UTF-8"), flatten = TRUE)
+    result <- result$tracks
+    result$artists <- purrr::map(result$artists, ~ list(id = .x$id, name = .x$name))
+    result <- result %>% dplyr::mutate(
+                artist_id = purrr::map_chr(artists, ~ toString(.x$id)),
+                artist_name = purrr::map_chr(artists, ~ toString(.x$name))
+                ) %>%
+                    dplyr::select(
+                    -is_playable,
+                    -album.is_playable,
+                    -href,
+                    -is_local,
+                    -preview_url,
+                    -uri,
+                    -album.artists,
+                    -album.href,
+                    -album.id,
+                    -album.type,
+                    -album.uri,
+                    -album.external_urls.spotify,
+                    -external_ids.isrc,
+                    -external_urls.spotify,
+                    -album.images,
+                    -artists) %>%
+                    dplyr::rename(
+                        album_type = album.album_type,
+                        track_id = id
+                    )
+    result
+}
+```
+
+```{r | new get_track_audio_features function}
+get_track_audio_features <- function(ids, authorization = get_spotify_access_token()){
+    assertthat::assert_that(
+        length(ids) <= 100,
+        msg = "The maximum length of the length of the ids vector is 100.  Please shorten the length of the inputed vector."
+    )
+    url <- 'https://api.spotify.com/v1/audio-features'
+    parameters <- list(
+        ids = paste0(ids, collapse = ','),
+        access_token = authorization
+    )
+    result <- httr::RETRY('GET', url, query = parameters, encode = 'json')
+    httr::stop_for_status(result)
+
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+    result <- result$audio_features %>% 
+    dplyr::select(
+        -type,
+        -uri,
+        -track_href,
+        -analysis_url
+    ) %>%
+    dplyr::rename(
+        track_id = id
+    )
+
+    result
+}
+```
+
+```{r | new get_track_audio_analysis}
+get_track_audio_analysis <- function(id, authorization = get_spotify_access_token()){
+    url <- stringr::str_glue("https://api.spotify.com/v1/audio-analysis/{id}")
+
+    parameters <- list(
+        access_token = authorization
+    )
+    result <- httr::RETRY('GET', url, query = parameters, encode = 'json', terminate_on = c(401, 403, 404))
+    httr::stop_for_status(result)
+
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+
+    result
+}
+```
+
+```{r | new get_track_analysis}
+get_track_analysis <- function(id, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$track) %>%
+              dplyr::select(-sample_md5,
+                     -codestring,
+                     -code_version,
+                     -echoprintstring,
+                     -echoprint_version,
+                     -synchstring,
+                     -synch_version,
+                     -rhythmstring)
+    track_id <- data.frame(track_id = id)
+    result <- merge(track_id, result)
+    result
+}
+```
+
+```{r | new get_track_bars}
+get_track_bars <- function(id, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$bars)
+    track_id <- data.frame(track_id = id)
+    result <- merge(track_id, result)
+    result
+}
+```
+
+```{r | new get_track_beats}
+get_track_beats <- function(id, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$beats)
+    track_id <- data.frame(track_id = id)
+    result <- merge(track_id, result)
+    result
+}
+```
+
+```{r | new get_track_sections}
+get_track_sections <- function(id, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$sections)
+    track_id <- data.frame(track_id = id)
+    result <- merge(track_id, result)
+    result
+}
+```
+
+```{r | new get_track_tatums}
+get_track_tatums <- function(id, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$tatums)
+    track_id <- data.frame(track_id = id)
+    result <- merge(track_id, result)
+    result
+}
+```
+
+```{r | new get_track_segments}
+get_track_segments <- function(id, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$segments)
+    track_id <- data.frame(track_id = id)
+    result <- merge(track_id, result)
+    result
+}
+```

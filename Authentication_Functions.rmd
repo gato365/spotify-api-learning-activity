@@ -1,0 +1,46 @@
+```{r | access token function}
+get_spotify_access_token <- function(client_id = Sys.getenv('SPOTIFY_CLIENT_ID'),
+                                     client_secret = Sys.getenv('SPOTIFY_CLIENT_SECRET')
+                                     ) {
+
+    post <- httr::RETRY('POST', 'https://accounts.spotify.com/api/token',
+                 httr::accept_json(),
+                 httr::authenticate(client_id, client_secret),
+                 body = list(grant_type = 'client_credentials'),
+                 encode = 'form', httr::config(http_version = 2)) %>%
+        httr::content()
+
+    if (!is.null(post$error)) {
+        stop(stringr::str_glue('Could not authenticate with given Spotify credentials:\n\t{post$error_description}'))
+    }
+
+    access_token <- post$access_token
+
+    access_token
+}
+```
+
+```{r | authentication code function}
+get_spotify_authorization_code <- function(
+        client_id = Sys.getenv("SPOTIFY_CLIENT_ID"),
+        client_secret = Sys.getenv("SPOTIFY_CLIENT_SECRET"),
+        scope = scopes()
+        ) {
+
+    endpoint <- httr::oauth_endpoint(authorize = 'https://accounts.spotify.com/authorize',
+                               access = 'https://accounts.spotify.com/api/token')
+
+    app <- httr::oauth_app('spotifyr', client_id, client_secret)
+
+    token <- purrr::safely(.f = httr::oauth2.0_token)(
+        endpoint = endpoint,
+        app = app,
+        scope = scope)
+
+    if (!is.null(token$error)) {
+        token$error
+    } else {
+      token$result
+    }
+}
+```

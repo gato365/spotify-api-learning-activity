@@ -1,0 +1,256 @@
+```{r | new get_artists function}
+get_artists <- function(ids, authorization = get_spotify_access_token()){
+    url <- "https://api.spotify.com/v1/artists"
+    parameters <- list(
+        ids = paste(ids, collapse = ","),
+        access_token = authorization
+    )
+    result <- httr::RETRY(verb = "GET", url, query = parameters, encode = "json", terminate_on = c(401, 403, 404))
+    httr::stop_for_status(result)
+    result <- jsonlite::fromJSON(httr::content(result, as = "text", encoding = "UTF-8"), flatten = TRUE)
+    result <- result$artists
+    result <- dplyr::select(result,
+                            -images,
+                            -href,
+                            -external_urls.spotify,
+                            -uri,
+                            -followers.href) %>%
+              dplyr::rename(
+                artist_id = id
+              )
+    result
+}
+```
+
+```{r | new get_artist_projects function}
+get_artist_projects <- function(id, limit = 50, offset = 0, authorization = get_spotify_access_token()){
+    url <- 'https://api.spotify.com/v1/artists'
+    parameters <- list(
+        include_groups = paste(c('album', 'single'), collapse = ','),
+        market = "US",
+        limit = limit,
+        offset = offset,
+        access_token = authorization
+    )
+    url <- stringr::str_glue('{url}/{id}/albums')
+    result <- httr::RETRY(verb = 'GET', url,
+                 query = parameters,
+                 encode = 'json', terminate_on = c(401, 403, 404))
+
+    httr::stop_for_status(result)
+
+    result <- jsonlite::fromJSON(
+        httr::content(result, as = 'text', encoding = 'UTF-8'),
+        flatten = TRUE
+        )
+    result$artists <- purrr::map(result$artists, ~ list(id = .x$id, name = .x$name))
+    result <- result$items %>% 
+            dplyr::mutate(
+                artist_id = purrr::map_chr(artists, ~ toString(.x$id)),
+                artist_name = purrr::map_chr(artists, ~ toString(.x$name))
+                ) %>%
+            dplyr::distinct(name, .keep_all = TRUE) %>%
+            dplyr::select(-type, -album_group, -href, -images, -is_playable, -uri, -external_urls.spotify, -artists) %>%
+            dplyr::rename(
+                album_id = id
+            )
+    result
+}
+```
+
+```{r | new get_artist_audio_features function}
+get_artist_audio_features <- function(id, authorization = get_spotify_access_token()){
+    info <- get_artists(id, authorization = authorization)
+    artist_id <- info$artist_id
+    artist_name <- info$name
+    if(is.null(artist_id)){
+        stop("No artist found with inputed ID.  Please try again with a different ID.")
+    }
+    albums <- get_artist_projects(artist_id, authorization = authorization)
+    if (is.null(albums) | length(albums)==0) {
+        stop("No albums found with inputed ID.  Please try again with a different ID.")
+    }
+    num_loops <- ceiling(nrow(albums) / 50)
+    if (num_loops > 1) {
+        albums <- purrr::map_df(1:num_loops, function(this_loop) {
+            get_artist_projects(artist_id,
+                              offset = (this_loop - 1) * 50,
+                              authorization = authorization)
+        })
+    }
+    albums <- albums %>%
+        dplyr::rename(
+          album_name = name
+        ) %>%
+        dplyr::mutate(
+          album_release_year = dplyr::case_when(
+              release_date_precision == 'year' ~ suppressWarnings(as.numeric(release_date)),
+              release_date_precision == 'day' ~ lubridate::year(
+                            as.Date(release_date, '%Y-%m-%d',
+                                    origin = '1970-01-01')),
+              TRUE ~ as.numeric(NA))
+        )
+        suppressWarnings({
+        tracks <- purrr::map_df(albums$album_id, function(album_id) {
+            tracks <- get_albums_tracks(album_id,
+                                            authorization = authorization)
+            num_loops <- ceiling(nrow(tracks) / 20)
+                if (num_loops > 1) {
+                    tracks <- purrr::map_df(1:num_loops, function(this_loop) {
+                        get_albums_tracks(album_id,
+                                        offset = (this_loop - 1) * 20,
+                                        authorization = authorization)
+        })} 
+        tracks <- tracks %>%
+                dplyr::mutate(
+                album_id = album_id,
+                album_name = paste(albums$album_name[albums$album_id == album_id], collapse = ", ")
+                ) %>%
+                dplyr::rename(
+                track_name = name
+                ) %>%
+                dplyr::distinct(track_name, .keep_all = TRUE)
+        })
+    })
+    num_loops_tracks <- ceiling(nrow(tracks) / 100)
+
+    track_audio_features <- purrr::map_df(1:num_loops_tracks, function(this_loop) {
+        track_ids <- tracks %>%
+            dplyr::slice(((this_loop * 100) - 99):(this_loop * 100)) %>%
+            dplyr::pull(track_id)
+        get_track_audio_features(track_ids, authorization = authorization)
+    }) %>%
+        dplyr::left_join(tracks, by = 'track_id') %>%
+        dplyr::select(-album_name)
+
+    albums %>%
+        dplyr::mutate(
+            artist_name = artist_name,
+            artist_id = artist_id
+    ) %>%
+        dplyr::select(
+            artist_name,
+            artist_id,
+            album_id,
+            album_release_date = release_date,
+            album_release_year,
+            album_release_date_precision = release_date_precision,
+            album_name
+    ) %>%
+        dplyr::left_join(track_audio_features, by = 'album_id') %>%
+        dplyr::mutate(key_name = pitch_class_lookup[key + 1],
+            mode_name = dplyr::case_when(mode == 1 ~ 'major',
+                                    mode == 0 ~ 'minor',
+                                    TRUE ~ as.character(NA)),
+            key_mode = paste(key_name, mode_name)) %>%
+        dplyr::select(-artist_name.y,
+                      -artist_id.y,
+                      -duration_ms.y,
+                      -is_playable) %>%
+        dplyr::rename(artist_name = artist_name.x,
+                      artist_id = artist_id.x,
+                      duration_ms = duration_ms.x)
+}
+```
+
+```{r | new get_artists_summary}
+get_artist_summary <- function(id, authorization = get_spotify_access_token()){
+    artist <- get_artists(id, authorization) %>% 
+              dplyr::select(name, artist_id) %>%
+              dplyr::rename(artist_name = name)
+
+    features <- get_artist_audio_features(id, authorization = authorization)
+
+    songs <- features %>%
+             dplyr::mutate(num_songs = dplyr::n()) %>%
+             dplyr::select(artist_name, num_songs)
+    
+    result <- dplyr::left_join(artist, songs, by = "artist_name") %>%
+              dplyr::slice(1)
+    
+    summary <- features %>%
+               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, explicit, tempo, duration_ms, mode) %>%
+               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = mean, sd = sd), na.rm = TRUE))
+
+    result <- merge(result, summary)
+    result
+}
+```
+
+```{r | new get_artists_summary}
+get_artists_summary <- function(ids, authorization = get_spotify_access_token()) {
+  purrr::map_dfr(ids, ~ get_artist_summary(.x, authorization = authorization))
+}
+```
+
+```{r | new get_related_artists}
+get_related_artists <- function(id, authorization = get_spotify_access_token()){
+    url <- stringr::str_glue("https://api.spotify.com/v1/artists/{id}/related-artists")
+
+    parameters <- list(
+        access_token = authorization
+    )
+    result <- httr::RETRY(verb = 'GET', url, query = parameters, encode = 'json', terminate_on = c(401, 403, 404))
+    httr::stop_for_status(result)
+
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'), flatten = TRUE)$artists %>%
+              dplyr::select(-href,
+                            -images,
+                            -uri,
+                            -external_urls.spotify,
+                            -followers.href) %>%
+              dplyr::rename(
+                artist_id = id,
+                artist_name = name
+              )
+
+    result
+}
+```
+
+```{r | new get_artist_top_tracks}
+get_artist_top_tracks <- function(id, authorization = get_spotify_access_token()){
+    url <- stringr::str_glue("https://api.spotify.com/v1/artists/{id}/top-tracks")
+    parameters = list(
+        market = "US",
+        access_token = authorization
+    )
+    result <- httr::RETRY(verb = 'GET', url, query = parameters, encode = 'json', terminate_on = c(401, 403, 404))
+    httr::stop_for_status(result)
+    result$artists <- purrr::map(result$artists, ~ list(id = .x$id, name = .x$name))
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'), flatten = TRUE)$tracks %>%
+              dplyr::mutate(
+                artist_id = purrr::map_chr(artists, ~ toString(.x$id)),
+                artist_name = purrr::map_chr(artists, ~ toString(.x$name))
+                ) %>%
+              dplyr::select(
+                -href,
+                -is_local,
+                -is_playable,
+                -preview_url,
+                -uri,
+                -album.artists,
+                -album.href,
+                -album.id,
+                -album.images,
+                -album.is_playable,
+                -album.release_date,
+                -album.release_date_precision,
+                -album.total_tracks,
+                -album.type,
+                -album.uri,
+                -album.external_urls.spotify,
+                -external_ids.isrc,
+                -external_urls.spotify,
+                -artists
+                ) %>%
+              dplyr::rename(
+                track_id = id,
+                album_type = album.album_type,
+                album_name = album.name,
+                track_name = name
+              )
+
+    result
+}
+```

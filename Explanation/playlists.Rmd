@@ -41,7 +41,23 @@ get_playlist <- function(playlist_id,
 }
 ```
 
+
 <!-- Function #2: COMPLETED -->
+1. Input 
+- playlist_id = playlist id
+- fields = 
+- limit = max number of tracks shown
+- offset = first index of tracks
+- market = country abbreviation
+- authorization = spotify access token
+- include_meta_info = 
+
+2. f
+3. f
+4. f
+5. f
+6. f
+7. f
 ```{r}
 get_playlist_tracks <- function(playlist_id,
                                 fields = NULL,
@@ -86,5 +102,30 @@ get_playlist_tracks <- function(playlist_id,
     }
     # return the items in the json;
     return(res)
+}
+```
+
+
+<!-- FUNCTION #3: -->
+```{r}
+get_my_playlists <- function(limit = 20,
+                             offset = 0,
+                             authorization = get_spotify_authorization_code(),
+                             include_meta_info = FALSE) {
+
+    base_url <- 'https://api.spotify.com/v1/me/playlists'
+    params <- list(
+        limit = limit,
+        offset = offset
+    )
+    res <- RETRY('GET', base_url, query = params, config(token = authorization), encode = 'json')
+    stop_for_status(res)
+    res <- fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+
+    if (!include_meta_info) {
+        res <- res$items
+    }
+
+    res
 }
 ```

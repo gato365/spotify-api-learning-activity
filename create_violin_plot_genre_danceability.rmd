@@ -1,4 +1,20 @@
-```{r | new get_possible_genres}
+
+Run required function before create_violin_plot:
+```{r}
+create_violin_plot_genre_danceability <- function(genres, sample_size=20, authorization = get_spotify_access_token()) {
+    list_df_genres <- genres %>% 
+        purrr::map(~ get_genre_track_features(.x, sample_size=sample_size, authorization=authorization) %>% mutate(genre = .x))
+    
+    df_genres <- bind_rows(list_df_genres)
+
+    ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  + 
+    ggplot2::geom_violin(aes(fill = genre))
+}
+```
+
+
+All Code Required Beforehand:
+```{r}
 get_possible_genres <- function(authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/recommendations/available-genre-seeds"
     parameters <- list(
@@ -10,9 +26,7 @@ get_possible_genres <- function(authorization = get_spotify_access_token()){
     result <- as.data.frame(result)
     result
 }
-```
 
-```{r | new get_genre_tracks}
 get_genre_tracks <- function(genre, limit = 20, offset = 0, authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/search"
     parameters <- list(
@@ -67,69 +81,37 @@ get_genre_tracks <- function(genre, limit = 20, offset = 0, authorization = get_
             )
     result
 }
-```
 
-```{r}
-View(get_genre_track_features("hip-hop"))
-```
-
-```{r | new get_genre_artists}
-get_genre_artists <- function(genre, limit = 20, offset = 0, authorization = get_spotify_access_token()){
-    url <- "https://api.spotify.com/v1/search"
+get_track_audio_features <- function(ids, authorization = get_spotify_access_token()){
+    assertthat::assert_that(
+        length(ids) <= 100,
+        msg = "The maximum length of the length of the ids vector is 100.  Please shorten the length of the inputed vector."
+    )
+    url <- 'https://api.spotify.com/v1/audio-features'
     parameters <- list(
-        q = stringr::str_glue('genre:"{genre}"'),
-        type = "artist",
-        market = "US",
-        limit = limit,
-        offset = offset,
+        ids = paste0(ids, collapse = ','),
         access_token = authorization
     )
-
-    result <- httr::RETRY("GET", url, query = parameters, encode = "json", terminate_on = c(401, 403, 404))
-
+    result <- httr::RETRY('GET', url, query = parameters, encode = 'json')
     httr::stop_for_status(result)
 
-    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'),
-                    flatten = TRUE)$artists$items
-
-    result <- result %>%
-              dplyr::select(
-                -href,
-                -images,
-                -uri,
-                -external_urls.spotify,
-                -followers.href
-              ) %>% 
-              dplyr::rename(
-                artist_id = id,
-                artist_name = name,
-                followers_total = followers.total
-              )
-}
-```
-
-```{r | new get_genre_summary}
-get_genre_summary <- function(genre, authorization = get_spotify_access_token()){
-    tracks <- get_genre_tracks(genre, authorization = authorization)
-
-    features <- get_track_audio_features(tracks$track_id, authorization = authorization)
-
-    summary <- features %>%
-               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo, duration_ms, mode) %>%
-               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = mean, sd = sd), na.rm = TRUE))
-
-    genre <- data.frame(genre = genre)
-
-    result <- merge(genre, summary)
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+    result <- result$audio_features %>% 
+    dplyr::select(
+        -type,
+        -uri,
+        -track_href,
+        -analysis_url
+    ) %>%
+    dplyr::rename(
+        track_id = id
+    )
 
     result
 }
-```
 
-```{r | new get_genre_track_features}
-get_genre_track_features <- function(genre, authorization = get_spotify_access_token()){
-    tracks <- get_genre_tracks(genre, authorization = authorization)
-
+get_genre_track_features <- function(genre, sample_size=20, authorization = get_spotify_access_token()){
+    tracks <- get_genre_tracks(genre, limit=sample_size, authorization = authorization)
     features <- get_track_audio_features(tracks$track_id, authorization = authorization)
 
     result <- dplyr::left_join(tracks, features, by = "track_id") %>%

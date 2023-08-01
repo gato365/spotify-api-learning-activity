@@ -52,3 +52,4 @@ create_violin_plot_album_danceability <- function(id, authorization = get_spotif
     ggplot2::geom_violin(aes(fill = album_name))
 }
 ```
+

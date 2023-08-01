@@ -1,3 +1,10 @@
+Parameters:
+    limit - Number of projects wanted to return.  Valid if between 0 and 50.  Defaults to 50
+    offset - Index of first project wanted.  Defaults to 0
+    authorization - access_token generated from the get_spotify_access_token() function
+Return:
+    A dataframe of new relase data, inlcuding the type, project name and id, release date, total number of tracks, and artist names and ids
+
 ```{r | new get_new_releases}
 get_new_releases <- function(limit = 20, offset = 0, authorization = get_spotify_access_token()){
     validate_parameters(limit = limit,
@@ -13,7 +20,7 @@ get_new_releases <- function(limit = 20, offset = 0, authorization = get_spotify
 
     httr::stop_for_status(result)
 
-    result <- jsonlite::fromJSON(content(result, as = 'text',
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text',
                             encoding = 'UTF-8'),
                     flatten = TRUE)
 

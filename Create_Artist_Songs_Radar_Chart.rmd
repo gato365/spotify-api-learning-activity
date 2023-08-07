@@ -1,7 +1,7 @@
 ```{r}
 create_artist_songs_radar_chart <- function(songs, vars = c(), colors = c(), authorization = get_spotify_access_token()){
-  if (length(songs) > 5){
-    stop("Please input only 5 or less tracks!")
+  if (length(songs) > 3){
+    stop("Please input only 3 or less tracks!")
   }
   create_beautiful_radarchart <- function(data, color = "#00AFBB", 
                                         vlabels = colnames(data), vlcex = 0.7,

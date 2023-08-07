@@ -1,14 +1,15 @@
-Parameters:
-    limit - Number of projects wanted to return.  Valid if between 0 and 50.  Defaults to 50
-    offset - Index of first project wanted.  Defaults to 0
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of new relase data, inlcuding the type, project name and id, release date, total number of tracks, and artist names and ids
-
-```{r | new get_new_releases}
+#' @title Search for Spotify new releases
+#' @param limit - Optional.  Number of projects wanted to return.  Valid if between 1 and 50.  Defaults to 20
+#' @param offset - Optional.  Index of first project wanted.  Defaults to 0
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of new relase data, inlcuding the type, project name and id, release date, total number of tracks, and artist names and ids
+#' @examples
+#' \dontrun{
+#' get_new_releases()
+#' get_new_releases(limit = 50, offset = 2)
+#' }
+#' @export
 get_new_releases <- function(limit = 20, offset = 0, authorization = get_spotify_access_token()){
-    validate_parameters(limit = limit,
-                        offset = offset)
     url <- "https://api.spotify.com/v1/browse/new-releases"
     parameters <- list(
         country = "US",
@@ -43,4 +44,3 @@ get_new_releases <- function(limit = 20, offset = 0, authorization = get_spotify
                 project_name = name
             )
 }
-```

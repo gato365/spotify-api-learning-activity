@@ -1,106 +1,55 @@
 
 Shorter:
+
+#' Creates Violin Plot for an Artist's Album for the variable Danceability.
+#'
+#'
+#' UNIFNISHED FUNCTION: create limit parameter;
+#' UNFINISHED DOCUMENTATION;
+#'
+#'
+#' @param id "The type parameter must be either 'artist' or 'user'."
+#' @param limit Optional. The maximum number of items to return.
+#' Default to \code{20}. Minimum: 1. Maximum: 50.
+#' @param offset Optional. The index of the first item to return.
+#' Defaults to \code{0}, i.e., the first object.
+#' Use with \code{limit} to get the next set of items.
+#' @param position_ms The 'position_ms' parameter must be an integer value that is greater than 0.
+#' @param country Optional. \cr
+#' An \href{https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2}{ISO 3166-1 alpha-2 country code} or the string \code{"from_token"}. Provide this parameter if you want to apply \href{https://developer.spotify.com/documentation/general/guides/track-relinking-guide/}{Track Relinking}
+#' @param locale Optional. The desired language, consisting of an
+#' \href{https://en.wikipedia.org/wiki/ISO_639-1}{ISO 639-1} language code and
+#' an \href{https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2}{ISO 3166-1 alpha-2 country code}, joined by an underscore. For example: \code{es_MX}, meaning "Spanish (Mexico)". Provide this parameter if you want the category strings returned in a particular language. Note that, if \code{locale} is not supplied, or if the specified language is not available, the category strings returned will be in the Spotify default language (American English). The \code{locale} parameter,
+#' combined with the \code{country} parameter, may give odd results if not carefully matched.
+#' For example \code{country=SE&locale=de_DE} will return a list of categories relevant to Sweden
+#' but as German language strings.
+#' @param market Optional. \cr
+#' An \href{https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2}{ISO 3166-1 alpha-2 country code} or the string \code{"from_token"}. Provide this parameter if you want to apply \href{https://developer.spotify.com/documentation/general/guides/track-relinking-guide/}{Track Relinking}
+#' @param time_range Optional. Over what time frame the affinities are computed.
+#' Valid values: long_term (calculated from several years of data and including all new data
+#' as it becomes available), \code{medium_term} (approximately last 6 months),
+#' \code{short_term} (approximately last 4 weeks). Default: \code{medium_term}.
+#' @param position_ms Optional. Integer indicating from what position to start playback. Must be a positive number. Passing in a position that is greater than the length of the track will cause the player to start playing the next song.
+#' @param volume_percent Required integer value. The volume to set.
+#'  Must be a value from 0 to 100 inclusive. Defaults to \code{50}.
+#' @param include_meta_info Optional. Boolean indicating whether to include full result,
+#'  with meta information such as \code{"total"}, and \code{"limit"}. Defaults to \code{FALSE}.
+#' @importFrom stringr str_detect
+#' @param state The state parameter must be exactly one of \code{'track'},
+#' \code{'context'} or  \code{'off'}.
+#' @return A violin plot of the albums of an artist based on Danceability from the Spotify API.
+
 ```{r}
+# limit = ? in parameters; how would you get that to only get a certain number of albums?
 create_violin_plot_album_danceability <- function(id, authorization = get_spotify_access_token()){
     df_artist <- get_artist_audio_features(id, authorization = authorization)
+
+    # go thru album_names col,
+    # create a list of the unique album names, 
+    # and only print or use the number user set limit to?
 
     ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + 
     ggplot2::geom_violin(aes(fill = album_name))
 }
 ```
 
-<!-- Longer (Unfinished Draft): -->
-```{r}
-# create_violin_plot_album_danceability <- function(id, authorization = get_spotify_access_token()){
-#     info <- get_artists(id, authorization = authorization)
-#     artist_id <- info$artist_id
-#     artist_name <- info$name
-#     if(is.null(artist_id)){
-#         stop("No artist found with inputed ID.  Please try again with a different ID.")
-#     }
-#     albums <- get_artist_projects(artist_id, authorization = authorization)
-#     if (is.null(albums) | length(albums)==0) {
-#         stop("No albums found with inputed ID.  Please try again with a different ID.")
-#     }
-#     num_loops <- ceiling(nrow(albums) / 50)
-#     if (num_loops > 1) {
-#         albums <- purrr::map_df(1:num_loops, function(this_loop) {
-#             get_artist_projects(artist_id,
-#                               offset = (this_loop - 1) * 50,
-#                               authorization = authorization)
-#         })
-#     }
-#     albums <- albums %>%
-#         dplyr::rename(
-#           album_name = name
-#         ) %>%
-#         dplyr::mutate(
-#           album_release_year = dplyr::case_when(
-#               release_date_precision == 'year' ~ suppressWarnings(as.numeric(release_date)),
-#               release_date_precision == 'day' ~ lubridate::year(
-#                             as.Date(release_date, '%Y-%m-%d',
-#                                     origin = '1970-01-01')),
-#               TRUE ~ as.numeric(NA))
-#         )
-#         suppressWarnings({
-#         tracks <- purrr::map_df(albums$album_id, function(album_id) {
-#             tracks <- get_albums_tracks(album_id,
-#                                             authorization = authorization)
-#             num_loops <- ceiling(nrow(tracks) / 20)
-#                 if (num_loops > 1) {
-#                     tracks <- purrr::map_df(1:num_loops, function(this_loop) {
-#                         get_albums_tracks(album_id,
-#                                         offset = (this_loop - 1) * 20,
-#                                         authorization = authorization)
-#         })} 
-#         tracks <- tracks %>%
-#                 dplyr::mutate(
-#                 album_id = album_id,
-#                 album_name = paste(albums$album_name[albums$album_id == album_id], collapse = ", ")
-#                 ) %>%
-#                 dplyr::rename(
-#                 track_name = name
-#                 ) %>%
-#                 dplyr::distinct(track_name, .keep_all = TRUE)
-#         })
-#     })
-#     num_loops_tracks <- ceiling(nrow(tracks) / 100)
-
-#     track_audio_features <- purrr::map_df(1:num_loops_tracks, function(this_loop) {
-#         track_ids <- tracks %>%
-#             dplyr::slice(((this_loop * 100) - 99):(this_loop * 100)) %>%
-#             dplyr::pull(track_id)
-#         get_track_audio_features(track_ids, authorization = authorization)
-#     }) %>%
-#         dplyr::left_join(tracks, by = 'track_id') %>%
-#         dplyr::select(-album_name)
-
-#     albums %>%
-#         dplyr::mutate(
-#             artist_name = artist_name,
-#             artist_id = artist_id
-#     ) %>%
-#         dplyr::select(
-#             artist_name,
-#             artist_id,
-#             album_id,
-#             album_release_date = release_date,
-#             album_release_year,
-#             album_release_date_precision = release_date_precision,
-#             album_name
-#     ) %>%
-#         dplyr::left_join(track_audio_features, by = 'album_id') %>%
-#         dplyr::mutate(key_name = pitch_class_lookup[key + 1],
-#             mode_name = dplyr::case_when(mode == 1 ~ 'major',
-#                                     mode == 0 ~ 'minor',
-#                                     TRUE ~ as.character(NA)),
-#             key_mode = paste(key_name, mode_name)) %>%
-#         dplyr::select(-artist_name.y,
-#                       -artist_id.y,
-#                       -duration_ms.y,
-#                       -is_playable) %>%
-#         dplyr::rename(artist_name = artist_name.x,
-#                       artist_id = artist_id.x,
-#                       duration_ms = duration_ms.x)
-# }
-```

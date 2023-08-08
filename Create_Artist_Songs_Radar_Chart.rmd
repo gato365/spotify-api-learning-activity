@@ -67,18 +67,14 @@ create_artist_songs_radar_chart <- function(songs, vars = c(), colors = c(), aut
   tracks <- purrr::map(songs, get_tracks) %>% 
     as.data.frame() %>% 
     dplyr::select(
-        track_name,
-        track_name.1,
-        track_name.2,
-        track_name.3,
-        track_name.4
+        dplyr::starts_with("track_name")
     )
-  tracks <- tidyr::pivot_longer(tracks, cols = starts_with("track_name"), 
+  tracks <- tidyr::pivot_longer(tracks, cols = dplyr::starts_with("track_name"), 
                           names_to = "track_names", values_to = "names")
   legend(
     x = "bottom", legend = tracks$names, horiz = TRUE,
     bty = "n", pch = 20 , col = colors,
-    text.col = "black", cex = 0.5
+    text.col = "black", cex = 1
     )
 
   par(op)
@@ -86,5 +82,5 @@ create_artist_songs_radar_chart <- function(songs, vars = c(), colors = c(), aut
 ```
 
 ```{r}
-View(create_artist_songs_radar_chart(songs = c("6YbhspuOar1D9WSSnfe7ds", "5Tbpp3OLLClPJF8t1DmrFD", "2NBQmPrOEEjA8VbeWOQGxO", "39QBkWKnap8wRSW4WB9OK0", "0xzI1KAr0Yd9tv8jlIk3sn"), vars = "liveness", colors = c("#2596BE", "#BC22BF", "#eb4034", "#31cc46", "#8c880f")))
+View(create_artist_songs_radar_chart(songs = c("6YbhspuOar1D9WSSnfe7ds", "5Tbpp3OLLClPJF8t1DmrFD", "2NBQmPrOEEjA8VbeWOQGxO"), vars = "liveness", colors = c("#2596BE", "#BC22BF", "#8c880f")))
 ```

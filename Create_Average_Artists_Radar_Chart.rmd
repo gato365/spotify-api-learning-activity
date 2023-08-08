@@ -68,13 +68,9 @@ create_average_artists_radar_chart <- function(artists, vars = c(), colors = c()
   artists <- purrr::map(artists, get_artists) %>% 
     as.data.frame() %>% 
     dplyr::select(
-        artist_name,
-        artist_name.1,
-        artist_name.2,
-        artist_name.3,
-        artist_name.4
+        dplyr::starts_with("artist_name")
     )
-  artists <- tidyr::pivot_longer(artists, cols = starts_with("artist_name"), 
+  artists <- tidyr::pivot_longer(artists, cols = dplyr::starts_with("artist_name"), 
                           names_to = "track_names", values_to = "names")
   legend(
     x = "bottom", legend = artists$names, horiz = TRUE,

@@ -61,18 +61,34 @@ get_albums <- function(ids, authorization = get_spotify_access_token()){
       )
   } else {
     # For single ID
-    df <- data.frame(
-      album_id = result$id,
-      label = result$label,
-      album_name = result$name,
-      popularity = result$popularity,
-      release_date = result$release_date,
-      release_date_precision = result$release_date_precision,
-      total_tracks = result$total_tracks,
-      type = result$album_type,
-      artist_id = result$artists$id,
-      artist_name = result$artists$name
-    )
+    if (length(result$artists) > 1) {
+      # For single ID with multiple artists
+      df <- data.frame(
+        album_id = result$id,
+        label = result$label,
+        album_name = result$name,
+        popularity = result$popularity,
+        release_date = result$release_date,
+        release_date_precision = result$release_date_precision,
+        total_tracks = result$total_tracks,
+        type = result$album_type,
+        artist_id = toString(result$artists$id),
+        artist_name = toString(result$artists$name)
+      )
+    } else {
+      df <- data.frame(
+        album_id = result$id,
+        label = result$label,
+        album_name = result$name,
+        popularity = result$popularity,
+        release_date = result$release_date,
+        release_date_precision = result$release_date_precision,
+        total_tracks = result$total_tracks,
+        type = result$album_type,
+        artist_id = result$artists$id,
+        artist_name = result$artists$name
+      )
+    }
     result <- df
   }
   result

@@ -8,7 +8,7 @@
 #'  create_artist_songs_radar_chart(songs = c("6YbhspuOar1D9WSSnfe7ds", "5Tbpp3OLLClPJF8t1DmrFD", "2NBQmPrOEEjA8VbeWOQGxO"), vars = "liveness")
 #' }
 #' @export
-create_artist_songs_radar_chart <- function(songs, vars = c(), colors = c(), authorization = get_spotify_access_token()){
+create_artist_songs_radar_chart <- function(songs, vars = c(), authorization = get_spotify_access_token()){
   if (length(songs) > 3){
     stop("Please input only 3 or less tracks!")
   }

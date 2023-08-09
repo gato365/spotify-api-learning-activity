@@ -8,7 +8,7 @@
 #'  create_average_artists_radar_chart(artists = c("5me0Irg2ANcsgc93uaYrpb", "7hJcb9fa4alzcOq3EaNPoG", "1ZwdS5xdxEREPySFridCfh", "7B4hKK0S9QYnaoqa9OuwgX", "1P8IfcNKwrkQP5xJWuhaOC"), vars = c("acousticness", "danceability"))
 #' }
 #' @export
-create_average_artists_radar_chart <- function(artists, vars = c(), colors = c(), authorization = get_spotify_access_token()){
+create_average_artists_radar_chart <- function(artists, vars = c(), authorization = get_spotify_access_token()){
   if (length(artists) > 5){
     stop("Please input only 5 or less artists!")
   }

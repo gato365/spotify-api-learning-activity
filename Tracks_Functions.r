@@ -126,7 +126,6 @@ get_tracks <- function(ids, authorization = get_spotify_access_token()){
   }
   result
 }
-View(get_tracks("4K09vJ27xCOreumtSuU6Ao"))
 
 #' @title Search for Spotify track features
 #' @param ids - A vector of Spotify track ids

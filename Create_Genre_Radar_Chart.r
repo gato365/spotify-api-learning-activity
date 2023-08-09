@@ -1,7 +1,6 @@
 #' @title Create a radar chart of genre features
 #' @param genres - A vector of Spotify genres
 #' @param vars - A vector of variables returned from get_genre_summary()
-#' @param colors - A vector of colors
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A radar chart displaying valence, energy, and speechiness, along with any other inputed variables
 #' @examples 

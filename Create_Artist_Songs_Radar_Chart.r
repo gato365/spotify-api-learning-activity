@@ -1,7 +1,6 @@
 #' @title Create a radar chart of track features
 #' @param songs - A vector of Spotify track ids
 #' @param vars - A vector of variables returned from get_track_audio_features()
-#' @param colors - A vector of colors
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A radar chart displaying valence, energy, and speechiness, along with any other inputed variables
 #' @examples 

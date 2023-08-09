@@ -1,7 +1,6 @@
 #' @title Create a radar chart of artist features
 #' @param artists - A vector of Spotify artist ids
 #' @param vars - A vector of variables returned from get_artist_summary()
-#' @param colors - A vector of colors
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A radar chart displaying valence, energy, and speechiness, along with any other inputed variables
 #' @examples 

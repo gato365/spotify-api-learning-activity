@@ -90,4 +90,3 @@ create_artist_songs_radar_chart <- function(songs, vars = c(), colors = c(), aut
 
   par(op)
 }
-View(create_artist_songs_radar_chart(songs = c("6YbhspuOar1D9WSSnfe7ds", "5Tbpp3OLLClPJF8t1DmrFD", "2NBQmPrOEEjA8VbeWOQGxO"), vars = "liveness"))

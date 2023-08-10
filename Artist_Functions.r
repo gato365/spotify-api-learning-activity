@@ -1,10 +1,13 @@
-Parameters:
-    ids - vector of Spotify artist ids
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of artist data, including artist name and id, genres of the artist, artist popularity, and the total number of followers on spotify
-
-```{r | new get_artists function}
+#' @title Search for Spotify artist information
+#' @param ids - A vector of Spotify artist ids
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of artist data, including artist name and id, genres of the artist, artist popularity, and the total number of followers on spotify
+#' @examples
+#' \dontrun{
+#' get_artists("0du5cEVh5yTK9QJze8zA0C")
+#' get_artists(c("0du5cEVh5yTK9QJze8zA0C", "6PvvGcCY2XtUcSRld1Wilr"))
+#' }
+#' @export
 get_artists <- function(ids, authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/artists"
     parameters <- list(
@@ -54,25 +57,26 @@ get_artists <- function(ids, authorization = get_spotify_access_token()){
   result
 
 }
-```
 
-Parameters:
-    id - A single Spotify artist id
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of artist track data, including the artist name and id, project id and name, release_date, track name and id, key and mode, and each of the following variables:
-        danceability
-        energy
-        loudness
-        speechiness
-        acousticness
-        instrumentalness
-        liveness
-        valence
-        tempo
-        duration_ms
-
-```{r | new get_artist_audio_features function}
+#' @title Search for Spotify artist audio feature information
+#' @param id - A single Spotify artist id
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of artist track data, including the artist name and id, project id and name, release_date, track name and id, key and mode, and each of the following variables:
+#'        danceability
+#'        energy
+#'        loudness
+#'        speechiness
+#'        acousticness
+#'        instrumentalness
+#'        liveness
+#'        valence
+#'        tempo
+#'        duration_ms
+#' @examples
+#' \dontrun{
+#' get_artist_audio_features("0du5cEVh5yTK9QJze8zA0C")
+#' }
+#' @export
 get_artist_audio_features <- function(id, authorization = get_spotify_access_token()){
     info <- get_artists(id, authorization = authorization)
     artist_id <- info$artist_id
@@ -153,32 +157,32 @@ get_artist_audio_features <- function(id, authorization = get_spotify_access_tok
             key_mode = paste(key_name, mode_name)) %>%
         dplyr::select(-artist_name.y,
                       -artist_id.y,
-                      -duration_ms.y,
-                      -is_playable) %>%
+                      -duration_ms.y) %>%
         dplyr::rename(artist_name = artist_name.x,
                       artist_id = artist_id.x,
                       duration_ms = duration_ms.x)
 }
-```
 
-Parameters:
-    id - A single Spotify artist id
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of artist summary data, including artist name and id, number of songs from the artist, and the mean and standard deviation for:
-        danceability
-        energy
-        loudness
-        speechiness
-        acousticness
-        instrumentalness
-        liveness
-        valence
-        tempo
-        duration_ms
-        mode
-
-```{r | new get_artists_summary}
+#' @title Search for Spotify artist feature summary
+#' @param id - A single Spotify artist id
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of artist summary data, including artist name and id, number of songs from the artist, and the mean and standard deviation for:
+#'        danceability
+#'        energy
+#'        loudness
+#'        speechiness
+#'        acousticness
+#'        instrumentalness
+#'        liveness
+#'        valence
+#'        tempo
+#'        duration_ms
+#'        mode
+#' @examples
+#' \dontrun{
+#' get_artist_summary("0du5cEVh5yTK9QJze8zA0C")
+#' }
+#' @export
 get_artist_summary <- function(id, authorization = get_spotify_access_token()){
     artist <- get_artists(id, authorization) %>% 
               dplyr::select(artist_name, artist_id)
@@ -199,38 +203,40 @@ get_artist_summary <- function(id, authorization = get_spotify_access_token()){
     result <- merge(result, summary)
     result
 }
-```
 
-Parameters:
-    id - A vector of Spotify artist ids
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of artists summary data, including artists names and ids, number of songs from the artists, and the mean and standard deviation for:
-        danceability
-        energy
-        loudness
-        speechiness
-        acousticness
-        instrumentalness
-        liveness
-        valence
-        tempo
-        duration_ms
-        mode
-
-```{r | new get_artists_summary}
+#' @title Search for Spotify artists feature summary
+#' @param ids - A vector of Spotify artist ids
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of artist summary data, including artist name and id, number of songs from the artist, and the mean and standard deviation for:
+#'        danceability
+#'        energy
+#'        loudness
+#'        speechiness
+#'        acousticness
+#'        instrumentalness
+#'        liveness
+#'        valence
+#'        tempo
+#'        duration_ms
+#'        mode
+#' @examples
+#' \dontrun{
+#' get_artists_summary(c("0du5cEVh5yTK9QJze8zA0C", "6PvvGcCY2XtUcSRld1Wilr"))
+#' }
+#' @export
 get_artists_summary <- function(ids, authorization = get_spotify_access_token()) {
   purrr::map_dfr(ids, ~ get_artist_summary(.x, authorization = authorization))
 }
-```
 
-Parameters:
-    id - A single Spotify artist id
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of related artist data, including the artist genres, artist id and name, popularity, and number of followers
-
-```{r | new get_related_artists}
+#' @title Search for Spotify related artists
+#' @param id - A single Spotify artist id
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of related artist data, including the artist genres, artist id and name, popularity, and number of followers
+#' @examples
+#' \dontrun{
+#' get_related_artists("0du5cEVh5yTK9QJze8zA0C")
+#' }
+#' @export
 get_related_artists <- function(id, authorization = get_spotify_access_token()){
     url <- stringr::str_glue("https://api.spotify.com/v1/artists/{id}/related-artists")
 
@@ -253,4 +259,3 @@ get_related_artists <- function(id, authorization = get_spotify_access_token()){
 
     result
 }
-```

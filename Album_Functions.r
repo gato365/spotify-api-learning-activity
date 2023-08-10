@@ -1,10 +1,13 @@
-Parameters:
-    ids - vector of Spotify album ids
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of album data, including album name and id, label, album popularity, release date, number of tracks, and artist info
-
-```{r | new get_albums function}
+#' @title Search for Spotify album information
+#' @param ids - A vector of Spotify album ids
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of album data, including album name and id, label, album popularity, release date, number of tracks, and artist info
+#' @examples
+#' \dontrun{
+#' get_albums("1uyf3l2d4XYwiEqAb7t7fX")
+#' get_albums(c("1uyf3l2d4XYwiEqAb7t7fX", "58ufpQsJ1DS5kq4hhzQDiI"))
+#' }
+#' @export
 get_albums <- function(ids, authorization = get_spotify_access_token()){
   url <- "https://api.spotify.com/v1/albums"
   parameters <- list(
@@ -58,33 +61,51 @@ get_albums <- function(ids, authorization = get_spotify_access_token()){
       )
   } else {
     # For single ID
-    df <- data.frame(
-      album_id = result$id,
-      label = result$label,
-      album_name = result$name,
-      popularity = result$popularity,
-      release_date = result$release_date,
-      release_date_precision = result$release_date_precision,
-      total_tracks = result$total_tracks,
-      type = result$album_type,
-      artist_id = result$artists$id,
-      artist_name = result$artists$name
-    )
+    if (length(result$artists) > 1) {
+      # For single ID with multiple artists
+      df <- data.frame(
+        album_id = result$id,
+        label = result$label,
+        album_name = result$name,
+        popularity = result$popularity,
+        release_date = result$release_date,
+        release_date_precision = result$release_date_precision,
+        total_tracks = result$total_tracks,
+        type = result$album_type,
+        artist_id = toString(result$artists$id),
+        artist_name = toString(result$artists$name)
+      )
+    } else {
+      df <- data.frame(
+        album_id = result$id,
+        label = result$label,
+        album_name = result$name,
+        popularity = result$popularity,
+        release_date = result$release_date,
+        release_date_precision = result$release_date_precision,
+        total_tracks = result$total_tracks,
+        type = result$album_type,
+        artist_id = result$artists$id,
+        artist_name = result$artists$name
+      )
+    }
     result <- df
   }
   result
 }
-```
 
-Parameters:
-    id - A single Spotify artist id
-    limit - Number of albums wanted to return.  Valid if between 0 and 50.  Defaults to 20
-    offset - Index of first album wanted.  Defaults to 0
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of album data, including ids and names for all albums by the artist, release date, number of tracks, and artists involved in the albums
-
-```{r | new get_artist_albums function}
+#' @title Search for Spotify artist's albums
+#' @param id - A single Spotify artist id
+#' @param limit - Optional.  Number of albums wanted to return.  Valid if between 1 and 50.  Defaults to 20
+#' @param offset - Optional.  Index of first album wanted.  Defaults to 0
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of album data, including ids and names for all albums by the artist, release date, number of tracks, and artists involved in the albums
+#' @examples
+#' \dontrun{
+#' get_artist_albums("0du5cEVh5yTK9QJze8zA0C")
+#' get_artist_albums("0du5cEVh5yTK9QJze8zA0C", limit = 50, offset = 2)
+#' }
+#' @export
 get_artist_albums <- function(id, limit = 20, offset = 0, authorization = get_spotify_access_token()){
     url <- 'https://api.spotify.com/v1/artists'
     parameters <- list(
@@ -120,17 +141,19 @@ get_artist_albums <- function(id, limit = 20, offset = 0, authorization = get_sp
             )
     result
 }
-```
 
-Parameters:
-    id - A single Spotify artist id
-    limit - Number of projects wanted to return.  Valid if between 1 and 50.  Defaults to 20
-    offset - Index of first project wanted.  Defaults to 0
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of project data, including the project type, project id and name, release date, number of tracks, and the artists names and ids
-
-```{r | new get_artist_projects function}
+#' @title Search for Spotify artist's projects
+#' @param id - A single Spotify artist id
+#' @param limit - Optional.  Number of albums wanted to return.  Valid if between 1 and 50.  Defaults to 20
+#' @param offset - Optional.  Index of first album wanted.  Defaults to 0
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of project data, including the project type, project id and name, release date, number of tracks, and the artists names and ids
+#' @examples
+#' \dontrun{
+#' get_artist_projects("0du5cEVh5yTK9QJze8zA0C")
+#' get_artist_projects("0du5cEVh5yTK9QJze8zA0C", limit = 50, offset = 2)
+#' }
+#' @export
 get_artist_projects <- function(id, limit = 20, offset = 0, authorization = get_spotify_access_token()){
     url <- 'https://api.spotify.com/v1/artists'
     parameters <- list(
@@ -165,26 +188,27 @@ get_artist_projects <- function(id, limit = 20, offset = 0, authorization = get_
             )
     result
 }
-```
 
-Parameters:
-    id - A single Spotify album id
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of album data, including album name and id, album popularity, number of tracks, and the mean and standard deviation for:
-        danceability
-        energy
-        loudness
-        speechiness
-        acousticness
-        instrumentalness
-        liveness
-        valence
-        tempo
-        duration_ms
-        mode
-
-```{r | new_get_album_summary}
+#' @title Search for album's feature summary
+#' @param id - A single Spotify album id
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of album data, including album name and id, album popularity, number of tracks, and the mean and standard deviation for:
+#'        danceability
+#'        energy
+#'        loudness
+#'        speechiness
+#'        acousticness
+#'        instrumentalness
+#'        liveness
+#'        valence
+#'        tempo
+#'        duration_ms
+#'        mode
+#' @examples
+#' \dontrun{
+#' get_album_summary("1uyf3l2d4XYwiEqAb7t7fX")
+#' }
+#' @export
 get_album_summary <- function(id, authorization = get_spotify_access_token()){
     album <- get_albums(id, authorization = authorization)
 
@@ -194,7 +218,7 @@ get_album_summary <- function(id, authorization = get_spotify_access_token()){
     
     summary <- features %>%
                dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo, duration_ms, mode) %>%
-               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = mean, sd = sd), na.rm = TRUE))
+               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = ~ mean(., na.rm = TRUE), sd = ~ sd(., na.rm = TRUE)), .names = "{.col}_{.fn}"))
     
     result <- merge(album, summary) %>% 
               dplyr::select(-label,
@@ -205,29 +229,28 @@ get_album_summary <- function(id, authorization = get_spotify_access_token()){
                             -artist_name)
     result
 }
-```
 
-Parameters:
-    id - A single Spotify artist id
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of album track data, including ids and names for the tracks, whether the track is explicit, track number in the album, artist names and ids, and the following variables:
-        danceability
-        energy
-        key
-        loudness
-        mode
-        speechiness
-        acousticness
-        instrumentalness
-        liveness
-        valence
-        tempo
-        duration_ms
-        time_signature
-
-
-```{r | new get_genre_track_features}
+#' @title Search for Spotify album track features
+#' @param id - A single Spotify artist id
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of album data, including album name and id, album popularity, number of tracks, and the mean and standard deviation for:
+#'        danceability
+#'        energy
+#'        loudness
+#'        mode
+#'        speechiness
+#'        acousticness
+#'        instrumentalness
+#'        liveness
+#'        valence
+#'        tempo
+#'        duration_ms
+#'        time_signature
+#' @examples
+#' \dontrun{
+#' get_album_track_features("1uyf3l2d4XYwiEqAb7t7fX")
+#' }
+#' @export
 get_album_track_features <- function(id, authorization = get_spotify_access_token()){
     tracks <- get_albums_tracks(id, authorization = authorization)
 
@@ -246,4 +269,3 @@ get_album_track_features <- function(id, authorization = get_spotify_access_toke
 
     result
 }
-```

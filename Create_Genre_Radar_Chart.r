@@ -1,8 +1,18 @@
-```{r}
-create_average_artists_radar_chart <- function(artists, vars = c(), colors = c(), authorization = get_spotify_access_token()){
-  if (length(artists) > 5){
-    stop("Please input only 5 or less artists!")
+#' @title Create a radar chart of genre features
+#' @param genres - A vector of Spotify genres
+#' @param vars - A vector of variables returned from get_genre_summary()
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A radar chart displaying valence, energy, and speechiness, along with any other inputed variables
+#' @examples 
+#' \dontrun{
+#'  create_genre_radar_chart(genres = c("hip-hop", "classical", "rock"), vars = c("instrumentalness", "acousticness"))
+#' }
+#' @export
+create_genre_radar_chart <- function(genres, vars = c(), authorization = get_spotify_access_token()){
+  if (length(genres) > 5){
+    stop("Please input only 5 or less genres!")
   }
+  colors = c("#6B8E23", "#89A8E0", "#A291B5", "#BCCC9A", "#D3D3D3")
   create_beautiful_radarchart <- function(data, color = "#00AFBB", 
                                         vlabels = colnames(data), vlcex = 0.7,
                                         caxislabels = NULL, title = NULL, ...){
@@ -41,12 +51,12 @@ create_average_artists_radar_chart <- function(artists, vars = c(), colors = c()
     min_max <- cbind(min_max, combinations)
   }
 
-  genre_summaries <- purrr::map(artists, ~ get_artist_summary(.x, authorization = authorization))
+  genre_summaries <- purrr::map(genres, ~ get_genre_summary(.x, authorization = authorization))
 
   final_summary_df <- dplyr::bind_rows(genre_summaries)
 
-  rownames(final_summary_df) <- artists
-  
+  rownames(final_summary_df) <- genres
+
   final_summary_df <- final_summary_df %>%
                       dplyr::select(
                         valence_mean,
@@ -61,31 +71,15 @@ create_average_artists_radar_chart <- function(artists, vars = c(), colors = c()
   
   create_beautiful_radarchart(
     data = final_summary_df, caxislabels = c(0, 0.25, 0.50, 0.75, 1),
-    color = colors,
-    vlcex = 1.5
+    color = colors[1:length(genres)],
+    vlcex = 1
   )
   
-  artists <- purrr::map(artists, get_artists) %>% 
-    as.data.frame() %>% 
-    dplyr::select(
-        artist_name,
-        artist_name.1,
-        artist_name.2,
-        artist_name.3,
-        artist_name.4
-    )
-  artists <- tidyr::pivot_longer(artists, cols = starts_with("artist_name"), 
-                          names_to = "track_names", values_to = "names")
   legend(
-    x = "bottom", legend = artists$names, horiz = TRUE,
-    bty = "n", pch = 20 , col = colors,
-    text.col = "black", cex = 1
+    x = "bottom", legend = rownames(final_summary_df[-c(1,2),]), horiz = TRUE,
+    bty = "n", pch = 20 , col = colors[1:length(genres)],
+    text.col = "black", cex = 1.5, pt.cex = 2
     )
 
   par(op)
 }
-```
-
-```{r}
-View(create_average_artists_radar_chart(artists = c("5me0Irg2ANcsgc93uaYrpb", "7hJcb9fa4alzcOq3EaNPoG", "1ZwdS5xdxEREPySFridCfh", "7B4hKK0S9QYnaoqa9OuwgX", "1P8IfcNKwrkQP5xJWuhaOC"), vars = c("acousticness", "danceability"), colors = c("#2596BE", "#BC22BF", "#eb4034", "#31cc46", "#8c880f")))
-```

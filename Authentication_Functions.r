@@ -1,9 +1,12 @@
-Parameters:
-    client_id - client id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_ID')
-    client_secret - secret id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_SECRET')
-Return:
-    Spotify access token for the user
-```{r | access token function}
+#' @title Get Spotify access token
+#' @param client_id - client id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_ID')
+#' @param client_secret - secret id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_SECRET')
+#' @return Spotify access token for the user
+#' @examples
+#' \dontrun{
+#' get_spotify_access_token()
+#' }
+#' @export
 get_spotify_access_token <- function(client_id = Sys.getenv('SPOTIFY_CLIENT_ID'),
                                      client_secret = Sys.getenv('SPOTIFY_CLIENT_SECRET')
                                      ) {
@@ -23,16 +26,17 @@ get_spotify_access_token <- function(client_id = Sys.getenv('SPOTIFY_CLIENT_ID')
 
     access_token
 }
-```
 
-Parameters:
-    client_id - client id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_ID')
-    client_secret - secret id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_SECRET')
-    scope - string of scopes for authorization access.  Defaults to all scopes
-Return:
-    Spotify authorization code for the user
-
-```{r | authentication code function}
+#' @title Get Spotify authorization code
+#' @param client_id - client id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_ID')
+#' @param client_secret - secret id as given by the Spotify for Developers app.  Defaults to Sys.getenv('SPOTIFY_CLIENT_SECRET')
+#' @param scope - string of scopes for authorization access.  Defaults to all scopes
+#' @return Spotify authorization code for the user
+#' @examples
+#' \dontrun{
+#' get_spotify_authorization_code()
+#' }
+#' @export
 get_spotify_authorization_code <- function(
         client_id = Sys.getenv("SPOTIFY_CLIENT_ID"),
         client_secret = Sys.getenv("SPOTIFY_CLIENT_SECRET"),
@@ -55,4 +59,3 @@ get_spotify_authorization_code <- function(
       token$result
     }
 }
-```

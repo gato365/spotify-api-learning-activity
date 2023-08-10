@@ -1,9 +1,11 @@
-Parameters:
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe containing all possible genre inputs for other genre functions
-
-```{r | new get_possible_genres}
+#' @title Search for Spotify possible genres
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe containing all possible genre inputs for other genre functions
+#' @examples
+#' \dontrun{
+#' get_possible_genres()
+#' }
+#' @export
 get_possible_genres <- function(authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/recommendations/available-genre-seeds"
     parameters <- list(
@@ -15,17 +17,19 @@ get_possible_genres <- function(authorization = get_spotify_access_token()){
     result <- as.data.frame(result)
     result
 }
-```
 
-Parameters:
-    genre - String of a genre
-    limit - Number of albums wanted to return.  Valid if between 1 and 50.  Defaults to 20
-    offset - Index of first album wanted.  Defaults to 0
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of track data, including duration, explicitness, track name and id, track popularity, whether the track was a single or on an album, and artist name and id
-
-```{r | new get_genre_tracks}
+#' @title Search for Spotify tracks of a specific genre
+#' @param genre - A string of a genre
+#' @param limit - Optional.  Number of albums wanted to return.  Valid if between 1 and 50.  Defaults to 20
+#' @param offset - Optional.  Index of first album wanted.  Defaults to 0
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of track data, including duration, explicitness, track name and id, track popularity, whether the track was a single or on an album, and artist name and id
+#' @examples
+#' \dontrun{
+#' get_genre_tracks("hip-hop")
+#' get_genre_tracks("rap", limit = 50, offset = 2)
+#' }
+#' @export
 get_genre_tracks <- function(genre, limit = 20, offset = 0, authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/search"
     parameters <- list(
@@ -80,20 +84,19 @@ get_genre_tracks <- function(genre, limit = 20, offset = 0, authorization = get_
             )
     result
 }
-```
 
-```{r}
-View(get_genre_track_features("hip-hop"))
-```
-Parameters:
-    genre - String of a genre
-    limit - Number of albums wanted to return.  Valid if between 0 and 50.  Defaults to 20
-    offset - Index of first album wanted.  Defaults to 0
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of artist data, including the artist's genre, artist name and id, artist popularity, and the total number of followers
-
-```{r | new get_genre_artists}
+#' @title Search for Spotify artists of a specific genre
+#' @param genre - A string of a genre
+#' @param limit - Optional.  Number of albums wanted to return.  Valid if between 1 and 50.  Defaults to 20
+#' @param offset - Optional.  Index of first album wanted.  Defaults to 0
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of artist data, including the artist's genre, artist name and id, artist popularity, and the total number of followers
+#' @examples
+#' \dontrun{
+#' get_genre_artists("hip-hop")
+#' get_genre_artists("rap", limit = 50, offset = 2)
+#' }
+#' @export
 get_genre_artists <- function(genre, limit = 20, offset = 0, authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/search"
     parameters <- list(
@@ -126,26 +129,27 @@ get_genre_artists <- function(genre, limit = 20, offset = 0, authorization = get
                 followers_total = followers.total
               )
 }
-```
 
-Parameters:
-    genre - String of a genre
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of genre track summary, including the inputted genre and the means and standard deviations for the following variables:
-        danceability
-        energy
-        loudness
-        speechiness
-        acousticness
-        instrumentalness
-        liveness
-        valence
-        tempo
-        duration_ms
-        mode
-
-```{r | new get_genre_summary}
+#' @title Search for Spotify feature summary of tracks from a specific genre
+#' @param genre - A string of a genre
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of genre track summary, including the inputted genre and the means and standard deviations for the following variables:
+#'        danceability
+#'        energy
+#'        loudness
+#'        speechiness
+#'        acousticness
+#'        instrumentalness
+#'        liveness
+#'        valence
+#'        tempo
+#'        duration_ms
+#'        mode
+#' @examples
+#' \dontrun{
+#' get_genre_summary("hip-hop")
+#' }
+#' @export
 get_genre_summary <- function(genre, authorization = get_spotify_access_token()){
     tracks <- get_genre_tracks(genre, authorization = authorization)
 
@@ -161,28 +165,29 @@ get_genre_summary <- function(genre, authorization = get_spotify_access_token())
 
     result
 }
-```
 
-Parameters:
-    genre - String of a genre
-    authorization - access_token generated from the get_spotify_access_token() function
-Return:
-    A dataframe of track feature data, including explicitness, track name and id, track popularity, track number in its album, artist name and id, and each of the following variables:
-        danceability
-        energy
-        key
-        loudness
-        mode
-        speechiness
-        acousticness
-        instrumentalness
-        liveness
-        valence
-        tempo
-        duration_ms
-        time_signature
-
-```{r | new get_genre_track_features}
+#' @title Search for Spotify track features of a specific genre
+#' @param genre - A string of a genre
+#' @param authorization - An access_token generated from the get_spotify_access_token() function
+#' @return A dataframe of track feature data, including explicitness, track name and id, track popularity, track number in its album, artist name and id, and each of the following variables:
+#'        danceability
+#'        energy
+#'        key
+#'        loudness
+#'        mode
+#'        speechiness
+#'        acousticness
+#'        instrumentalness
+#'        liveness
+#'        valence
+#'        tempo
+#'        duration_ms
+#'        time_signature
+#' @examples
+#' \dontrun{
+#' get_genre_track_features("hip-hop")
+#' }
+#' @export
 get_genre_track_features <- function(genre, authorization = get_spotify_access_token()){
     tracks <- get_genre_tracks(genre, authorization = authorization)
 
@@ -198,4 +203,3 @@ get_genre_track_features <- function(genre, authorization = get_spotify_access_t
 
     result
 }
-```

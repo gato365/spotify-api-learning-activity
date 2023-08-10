@@ -1,14 +1,28 @@
 
 Run required function before create_violin_plot:
 ```{r}
-create_violin_plot_genre_danceability <- function(genres, sample_size=20, authorization = get_spotify_access_token()) {
+create_violin_plot_genre_danceability <- function(genres, limit=20, authorization = get_spotify_access_token()) {
     list_df_genres <- genres %>% 
-        purrr::map(~ get_genre_track_features(.x, sample_size=sample_size, authorization=authorization) %>% mutate(genre = .x))
+        purrr::map(~ get_genre_track_features(.x, limit=limit, authorization=authorization) %>% mutate(genre = .x))
     
     df_genres <- bind_rows(list_df_genres)
 
-    ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  + 
-    ggplot2::geom_violin(aes(fill = genre))
+    # add labels, x y axes, titles, themes b w, larger text; make prettier;
+    df_genres <- bind_rows(list_df_genres)
+    if (length(genres) <= 5) {
+      ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  + 
+        ggplot2::geom_violin(aes(fill = genre)) + 
+        labs(title = "Danceability of Genre Top Tracks", x = "Genre", y = "Danceability", fill = "Genre") + 
+        theme(plot.title = element_text(hjust = 0.5))
+      } else {
+        ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  + 
+          ggplot2::geom_violin(aes(fill = genre)) + 
+          labs(title = "Danceability of Genre Top Tracks", x = "") + 
+          theme(plot.title = element_text(hjust = 0.5), 
+                axis.text.x=element_blank(), 
+                axis.ticks.x=element_blank()
+          )
+      }
 }
 ```
 
@@ -110,8 +124,8 @@ get_track_audio_features <- function(ids, authorization = get_spotify_access_tok
     result
 }
 
-get_genre_track_features <- function(genre, sample_size=20, authorization = get_spotify_access_token()){
-    tracks <- get_genre_tracks(genre, limit=sample_size, authorization = authorization)
+get_genre_track_features <- function(genre, limit=20, authorization = get_spotify_access_token()){
+    tracks <- get_genre_tracks(genre, limit=limit, authorization = authorization)
     features <- get_track_audio_features(tracks$track_id, authorization = authorization)
 
     result <- dplyr::left_join(tracks, features, by = "track_id") %>%

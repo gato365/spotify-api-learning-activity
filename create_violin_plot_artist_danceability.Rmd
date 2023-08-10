@@ -1,0 +1,98 @@
+Inputs:
+- Vector of characters/strings of artist ids (Spotify -> Artist -> Three Dots -> Share -> Copy Link to Artist -> after / and before ?)
+- access token (Spotify Developers -> Create App -> Client ID and Client Secret)
+
+Return:
+- Violin Plot with Artists on X axis as categorical variables and Danceability (numerical value given by Spotify API) of their top tracks (usually 10 songs) on the Y-Axis;
+```{r}
+create_violin_plot_artist_danceability <- function(artist_ids, authorization = get_spotify_access_token()) {
+    # Get top 10 tracks of artist:
+    list_df_artist_top_tracks <- artist_ids %>% 
+        purrr::map(~ get_artist_top_tracks(.x))
+
+    # From list above, pull out the song ids and make into vector:
+    vector_song_ids <- list_df_artist_top_tracks %>%
+        map(~ .x %>% pull(id)) %>% 
+        unlist()
+
+    # Vector of artist names:
+    # Get artist names and duplicate them
+    vector_artist_names <- artist_ids %>% 
+    map(~ rep(get_artists(.x)$name, times = nrow(get_artist_top_tracks(.x)))) %>% 
+    unlist()
+
+    # Get track audio features of artist 10 songs:
+    df_tracks <- get_track_audio_features(vector_song_ids, authorization = get_spotify_access_token()) %>%  
+        mutate(artist = vector_artist_names)
+    
+    # X-axis labels only if number of artist input is 5 or less;
+    if (length(artist_ids) <= 5) {
+      ggplot2::ggplot(df_tracks, aes(x=artist, y=danceability))  + 
+        ggplot2::geom_violin(aes(fill = artist)) + 
+        labs(title = "Danceability of Artist Top Tracks", x = "Artist", y = "Danceability", fill = "Artist") + 
+        theme(plot.title = element_text(hjust = 0.5))
+    } else {
+      ggplot2::ggplot(df_tracks, aes(x=artist, y=danceability))  + 
+        ggplot2::geom_violin(aes(fill = artist)) + 
+        labs(title = "Danceability of Artist Top Tracks", x = "") + 
+        theme(plot.title = element_text(hjust = 0.5), 
+              axis.text.x=element_blank(),
+              axis.ticks.x=element_blank() 
+        )
+    }
+}
+```
+
+All Code Required Beforehand:
+```{r}
+# install.packages("spotifyr")
+# install.packages("tidyverse")
+library(spotifyr)
+library(tidyverse)
+```
+
+```{r}
+Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+
+access_token <- get_spotify_access_token()
+```
+
+```{r}
+get_artist_top_tracks <- function(id,
+                                  market = 'US',
+                                  authorization = get_spotify_access_token(),
+                                  include_meta_info = FALSE) {
+
+    base_url <- 'https://api.spotify.com/v1/artists'
+
+    if (!is.null(market)) {
+        if (!str_detect(market, '^[[:alpha:]]{2}$')) {
+            stop('"market" must be an ISO 3166-1 alpha-2 country code')
+        }
+    }
+
+    params <- list(
+        market = market,
+        access_token = authorization
+    )
+    url <- str_glue('{base_url}/{id}/top-tracks')
+    res <- RETRY(verb = 'GET', url, query = params, encode = 'json', terminate_on = c(401, 403, 404))
+    stop_for_status(res)
+
+    res <- fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+
+    if (!include_meta_info) {
+        res <- res$tracks
+    }
+
+    res
+}
+```
+
+```{r}
+# install.packages("httr")
+# install.packages("jsonlite")
+library(httr)
+library(jsonlite)
+```

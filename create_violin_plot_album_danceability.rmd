@@ -18,19 +18,31 @@ create_violin_plot_album_danceability <- function(artist_id, authorization = get
     
     # not based on size of input, but rather number of rows of df;
     # if (nrow(df_artist) <= 5)
-    if(length(unique(df_artist$album_name)) <= 3) {
-      ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + 
-        ggplot2::geom_violin(aes(fill = album_name)) + 
-        # can use springf or paste; equivalent of {} for var in string;
-        labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name), x = "Album", y = "Danceability", fill = "Album") + 
-        theme(plot.title = element_text(hjust = 0.5))
+    if(length(unique(df_artist$album_name)) <= 5) {
+      # Can also try total characters divided by 10 to create ratio requirement; Maybe;
+      if (any(nchar(unique(df_artist$album_name)) > 10)) {
+        ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + 
+          ggplot2::geom_violin(aes(fill = album_name)) + 
+          # can use springf or paste; equivalent of {} for var in string;
+          labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name), x = "", y = "Danceability", fill = "Album") + 
+        theme(plot.title = element_text(hjust = 0.5), 
+              axis.text.x=element_blank(), 
+              axis.ticks.x=element_blank()
+        )
+      } else {
+        ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + 
+          ggplot2::geom_violin(aes(fill = album_name)) + 
+          # can use sprintf or paste; equivalent of {} for var in string;
+          labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name), x = "Album", y = "Danceability", fill = "Album") + 
+          theme(plot.title = element_text(hjust = 0.5))
+        }
     } else {
       ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + 
         ggplot2::geom_violin(aes(fill = album_name)) + 
         labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name), x = "", y = "Danceability", fill = "Album") + 
         theme(plot.title = element_text(hjust = 0.5), 
-              axis.text.x=element_blank(),
-              axis.ticks.x=element_blank() 
+              axis.text.x=element_blank(), 
+              axis.ticks.x=element_blank()
         )
     }
 }

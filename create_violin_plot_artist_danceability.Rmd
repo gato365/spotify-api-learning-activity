@@ -25,8 +25,7 @@ create_violin_plot_artist_danceability <- function(artist_ids, authorization = g
     df_tracks <- get_track_audio_features(vector_song_ids, authorization = get_spotify_access_token()) %>%  
         mutate(artist = vector_artist_names)
     
-    # X-axis labels only if number of artist input is 5 or less;
-    if (length(artist_ids) <= 5) {
+    if ((length(artist_ids) <= 3 & any(nchar(vector_artist_names) > 15) & any(nchar(vector_artist_names) < 30)) | (length(artist_ids) <= 5 & all(nchar(vector_artist_names) <= 15))) {
       ggplot2::ggplot(df_tracks, aes(x=artist, y=danceability))  + 
         ggplot2::geom_violin(aes(fill = artist)) + 
         labs(title = "Danceability of Artist Top Tracks", x = "Artist", y = "Danceability", fill = "Artist") + 

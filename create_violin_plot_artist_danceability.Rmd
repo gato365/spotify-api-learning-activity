@@ -48,16 +48,12 @@ All Code Required Beforehand:
 # install.packages("tidyverse")
 library(spotifyr)
 library(tidyverse)
-```
 
-```{r}
 Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
 access_token <- get_spotify_access_token()
-```
 
-```{r}
 get_artist_top_tracks <- function(id,
                                   market = 'US',
                                   authorization = get_spotify_access_token(),
@@ -87,9 +83,7 @@ get_artist_top_tracks <- function(id,
 
     res
 }
-```
 
-```{r}
 # install.packages("httr")
 # install.packages("jsonlite")
 library(httr)

@@ -1,16 +1,14 @@
-
-Shorter:
-
 #' Creates Violin Plot for an Artist's Album for the variable Danceability.
 
-#' UNIFNISHED FUNCTION: create limit parameter;
+#' UNIFNISHED FUNCTION: create limit parameter; Not know if worth;
 
 Inputs:
-- artist id
+- artist id: Vector of artist id in string/character format
 - spotify access token (client id + client secret)
 
 Returns:
 - A violin plot of the albums of an artist based on Danceability from the Spotify API.
+Danceability on the Y-Axis and Album Names on the X-Axis;
 
 ```{r}
 create_violin_plot_album_danceability <- function(artist_id, authorization = get_spotify_access_token()){
@@ -48,19 +46,17 @@ create_violin_plot_album_danceability <- function(artist_id, authorization = get
 }
 ```
 
-```{r}
-# library(devtools)
-# install_github("AdamDelRio/SpotifyProject")
-```
-
-```{r}
-# get_album()
-```
-
-TRY RUNNING IN WEEK 4 use function LIMIT test;
 
 All Required Code to Run Beforehand:
 ```{r | new get_artist_audio_features function}
+library(spotifyr)
+library(tidyverse)
+
+Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+
+access_token <- get_spotify_access_token()
+
 get_artist_audio_features <- function(id, authorization = get_spotify_access_token()){
     info <- get_artists(id, authorization = authorization)
     artist_id <- info$artist_id

@@ -1,5 +1,11 @@
 
-Run required function before create_violin_plot:
+Inputs:
+- Vector of genre(s) in string/character format (See possibilities from get_possible_genres() but not all genres works)
+- Limit of top tracks in that genre; Up to 50 and minimum 1; Default 20 of top tracks;
+- Spotify Access Token
+
+Return:
+- Violin Plot(s) of Inputted Genres with Genres on X-Axis and Danceability Number on Y-Axis with Legend;
 ```{r}
 create_violin_plot_genre_danceability <- function(genres, limit=20, authorization = get_spotify_access_token()) {
     list_df_genres <- genres %>% 
@@ -29,6 +35,14 @@ create_violin_plot_genre_danceability <- function(genres, limit=20, authorizatio
 
 All Code Required Beforehand:
 ```{r}
+library(spotifyr)
+library(tidyverse)
+
+Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+
+access_token <- get_spotify_access_token()
+
 get_possible_genres <- function(authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/recommendations/available-genre-seeds"
     parameters <- list(

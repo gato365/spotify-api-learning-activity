@@ -1,0 +1,5 @@
+Sys.setenv(SPOTIFY_CLIENT_ID = "9b791d794b834a379a7fb31fee32431d")
+Sys.setenv(SPOTIFY_CLIENT_SECRET = "b582eccc019f4ab4aea3fdda49c0fb69")
+library(tidyverse)
+library(httr)
+library(jsonlite)

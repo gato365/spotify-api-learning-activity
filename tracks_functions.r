@@ -1,5 +1,6 @@
 #' @title Search for Spotify album's tracks
-#' @param ids - A vector of Spotify album ids
+#' @param queries - A vector of album names.  Deafualts to NULL.  Only use this or ids
+#' @param ids - A vector of Spotify album ids.  Deafualts to NULL.  Only use this or queries
 #' @param limit - Optional.  Number of albums wanted to return.  Valid if between 1 and 50.  Defaults to 20
 #' @param offset - Optional.  Index of first album wanted.  Defaults to 0
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
@@ -8,9 +9,14 @@
 #' \dontrun{
 #' get_albums_tracks(c("4VZ7jhV0wHpoNPCB7Vmiml", "58ufpQsJ1DS5kq4hhzQDiI"))
 #' get_albums_tracks("4VZ7jhV0wHpoNPCB7Vmiml", limit = 50, offset = 2)
+#' get_albums_tracks("An Evening With Silk Sonic")
 #' }
 #' @export
-get_albums_tracks <- function(ids, limit = 20, offset = 0, authorization = get_spotify_access_token()){
+get_albums_tracks <- function(queries = NULL, ids = NULL, limit = 20, offset = 0, authorization = get_spotify_access_token()){
+    if(!is.null(queries)) {
+        search <- search_spotify(queries, "album", authorization = authorization)
+        ids <- as.vector(search$id)
+    }
     url <- "https://api.spotify.com/v1/albums"
     parameters <- list(
         ids = paste(ids, collapse = ","),
@@ -44,16 +50,22 @@ get_albums_tracks <- function(ids, limit = 20, offset = 0, authorization = get_s
 }
 
 #' @title Search for Spotify track information
-#' @param ids - A vector of Spotify track ids
+#' @param queries - A vector of track names.  Deafualts to NULL.  Only use this or ids
+#' @param ids - A vector of Spotify track ids.  Deafualts to NULL.  Only use this or queries
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track information, including duration, explicitness, track name and id, popularity, whether the song was in an album or a single, album name and id, release date, number of tracks on album, and artist name and id
 #' @examples
 #' \dontrun{
 #' get_tracks("3G5iN5QBqMeXx3uZPy8tgB")
 #' get_tracks(c("3G5iN5QBqMeXx3uZPy8tgB", "3w3y8KPTfNeOKPiqUTakBh"))
+#' get_tracks(c("Locked out of Heaven", "When I Was Your Man"))
 #' }
 #' @export
-get_tracks <- function(ids, authorization = get_spotify_access_token()){
+get_tracks <- function(queries = NULL, ids = NULL, authorization = get_spotify_access_token()){
+    if(!is.null(queries)) {
+        search <- search_spotify(queries, "track", authorization = authorization)
+        ids <- as.vector(search$id)
+    }
     url <- "https://api.spotify.com/v1/tracks"
     parameters <- list(
     market = "US",
@@ -128,7 +140,8 @@ get_tracks <- function(ids, authorization = get_spotify_access_token()){
 }
 
 #' @title Search for Spotify track features
-#' @param ids - A vector of Spotify track ids
+#' @param queries - A vector of track names.  Deafualts to NULL.  Only use this or ids
+#' @param ids - A vector of Spotify track ids.  Deafualts to NULL.  Only use this or queries
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track feature information, including track id and the following variables:
 #'        danceability
@@ -147,13 +160,18 @@ get_tracks <- function(ids, authorization = get_spotify_access_token()){
 #' @examples
 #' \dontrun{
 #' get_track_audio_features("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_audio_features("Locked out of Heaven")
 #' }
 #' @export
-get_track_audio_features <- function(ids, authorization = get_spotify_access_token()){
+get_track_audio_features <- function(queries = NULL, ids = NULL, authorization = get_spotify_access_token()){
     assertthat::assert_that(
         length(ids) <= 100,
         msg = "The maximum length of the length of the ids vector is 100.  Please shorten the length of the inputed vector."
     )
+    if(!is.null(queries)) {
+        search <- search_spotify(queries, "track", authorization = authorization)
+        ids <- as.vector(search$id)
+    }
     url <- 'https://api.spotify.com/v1/audio-features'
     parameters <- list(
         ids = paste0(ids, collapse = ','),
@@ -178,15 +196,21 @@ get_track_audio_features <- function(ids, authorization = get_spotify_access_tok
 }
 
 #' @title Search for Sportify track audio analysis
-#' @param id - A single Spotify track id
+#' @param query - A single track name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify track id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A list of audio analysis data, including meta, track, bars, beats, sections, tatums, and segments data
 #' @examples
 #' \dontrun{
 #' get_track_audio_analysis("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_audio_analysis("Locked out of Heaven")
 #' }
 #' @noRd
-get_track_audio_analysis <- function(id, authorization = get_spotify_access_token()){
+get_track_audio_analysis <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    if(!is.null(query)) {
+        search <- search_spotify(query, "track", authorization = authorization)
+        id <- as.vector(search$id)
+    }
     url <- stringr::str_glue("https://api.spotify.com/v1/audio-analysis/{id}")
 
     parameters <- list(
@@ -200,17 +224,20 @@ get_track_audio_analysis <- function(id, authorization = get_spotify_access_toke
     result
 }
 
+
 #' @title Search for Spotify track analysis
-#' @param id - A single Spotify track id
+#' @param query - A single track name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify track id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track data, including track id, duration, loudness, start and end of fade, tempo and confidence, time signature and confidence, key and confidence, and mode and confidence
 #' @examples
 #' \dontrun{
 #' get_track_analysis("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_analysis("Locked out of Heaven")
 #' }
 #' @export
-get_track_analysis <- function(id, authorization = get_spotify_access_token()){
-    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$track) %>%
+get_track_analysis <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(query, id, authorization = authorization)$track) %>%
               dplyr::select(-sample_md5,
                      -codestring,
                      -code_version,
@@ -219,93 +246,110 @@ get_track_analysis <- function(id, authorization = get_spotify_access_token()){
                      -synchstring,
                      -synch_version,
                      -rhythmstring)
-    track_id <- data.frame(track_id = id)
-    result <- merge(track_id, result)
+    track_info <- data.frame(get_tracks(queries = query, ids = id, authorization = authorization)) %>%
+                             select(track_name, track_id)
+    result <- merge(track_info, result)
     result
 }
 
 #' @title Search for Spotify track bar information
-#' @param id - A single Spotify track id
+#' @param query - A single track name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify track id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track bar information, including track id, and start, end, and confidence of bar intervals
 #' @examples
 #' \dontrun{
 #' get_track_bars("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_bars("Locked out of Heaven")
 #' }
 #' @export
-get_track_bars <- function(id, authorization = get_spotify_access_token()){
-    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$bars)
-    track_id <- data.frame(track_id = id)
-    result <- merge(track_id, result)
+get_track_bars <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(query, id, authorization = authorization)$bars)
+    track_info <- data.frame(get_tracks(queries = query, ids = id, authorization = authorization)) %>%
+                             select(track_name, track_id)
+    result <- merge(track_info, result)
     result
 }
 
 #' @title Search for Spotify track beats information
-#' @param id - A single Spotify track id
+#' @param query - A single track name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify track id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track beat information, including track id, and start, end, and confidence of beat intervals
 #' @examples
 #' \dontrun{
 #' get_track_beats("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_beats("Locked out of Heaven")
 #' }
 #' @export
-get_track_beats <- function(id, authorization = get_spotify_access_token()){
-    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$beats)
-    track_id <- data.frame(track_id = id)
-    result <- merge(track_id, result)
+get_track_beats <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(query, id, authorization = authorization)$beats)
+    track_info <- data.frame(get_tracks(queries = query, ids = id, authorization = authorization)) %>%
+                             select(track_name, track_id)
+    result <- merge(track_info, result)
     result
 }
 
 #' @title Search for Spotify track section information
-#' @param id - A single Spotify track id
+#' @param query - A single track name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify track id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track section information, including track id, start, end, and confidence of section intervals, loudness, tempo and confidence, key and confidence, mode and confidence, and time signature and confidence
 #' @examples
 #' \dontrun{
 #' get_track_sections("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_sections("Locked out of Heaven")
 #' }
 #' @export
-get_track_sections <- function(id, authorization = get_spotify_access_token()){
-    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$sections)
-    track_id <- data.frame(track_id = id)
-    result <- merge(track_id, result)
+get_track_sections <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(query, id, authorization = authorization)$sections)
+    track_info <- data.frame(get_tracks(queries = query, ids = id, authorization = authorization)) %>%
+                             select(track_name, track_id)
+    result <- merge(track_info, result)
     result
 }
 
 #' @title Search for Spotify track tatum information
-#' @param id - A single Spotify track id
+#' @param query - A single track name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify track id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track tatum information, including track id, and start, end, and confidence of tatum intervals
 #' @examples
 #' \dontrun{
 #' get_track_tatums("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_tatums("Locked out of Heaven")
 #' }
 #' @export
-get_track_tatums <- function(id, authorization = get_spotify_access_token()){
-    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$tatums)
-    track_id <- data.frame(track_id = id)
-    result <- merge(track_id, result)
+get_track_tatums <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(query, id, authorization = authorization)$tatums)
+    track_info <- data.frame(get_tracks(queries = query, ids = id, authorization = authorization)) %>%
+                             select(track_name, track_id)
+    result <- merge(track_info, result)
     result
 }
 
 #' @title Search for Spotify track segment information
-#' @param id - A single Spotify track id
+#' @param query - A single track name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify track id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track segment information, including track id, start, end, and confidence of segment intervals, loudness at the start of the interval, time of maximum loudness, the maximum loudness, the end loudness, the pitches, and the timbre
 #' @examples
 #' \dontrun{
 #' get_track_segments("3w3y8KPTfNeOKPiqUTakBh")
+#' get_track_segments("Locked out Heaven")
 #' }
 #' @export
-get_track_segments <- function(id, authorization = get_spotify_access_token()){
-    result <- as.data.frame(get_track_audio_analysis(id, authorization = authorization)$segments)
-    track_id <- data.frame(track_id = id)
-    result <- merge(track_id, result)
+get_track_segments <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    result <- as.data.frame(get_track_audio_analysis(query, id, authorization = authorization)$segments)
+    track_info <- data.frame(get_tracks(queries = query, ids = id, authorization = authorization)) %>%
+                             select(track_name, track_id)
+    result <- merge(track_info, result)
     result
 }
 
 #' @title Search for Spotify album's track features
-#' @param id - A single Spotify album id
+#' @param query - A single album name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify album id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of album track data, including ids and names for the tracks, whether the track is explicit, track number in the album, artist names and ids, and the following variables:
 #'        danceability
@@ -324,10 +368,15 @@ get_track_segments <- function(id, authorization = get_spotify_access_token()){
 #' @examples
 #' \dontrun{
 #' get_album_track_features("58ufpQsJ1DS5kq4hhzQDiI")
+#' get_album_track_features("An Evening With Silk Sonic")
 #' }
 #' @export
-get_album_track_features <- function(id, authorization = get_spotify_access_token()){
-    tracks <- get_albums_tracks(id, authorization = authorization)
+get_album_track_features <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    if(!is.null(query)) {
+        search <- search_spotify(query, "track", authorization = authorization)
+        id <- as.vector(search$id)
+    }
+    tracks <- get_albums_tracks(queries = query, ids = id, authorization = authorization)
 
     features <- get_track_audio_features(tracks$track_id, authorization = authorization)
 
@@ -342,17 +391,23 @@ get_album_track_features <- function(id, authorization = get_spotify_access_toke
 
     result
 }
-
+View()
 #' @title Search for Spotify artist's top tracks
-#' @param id - A single Spotify artist id
+#' @param query - A single artist name.  Deafualts to NULL.  Only use this or id
+#' @param id - A single Spotify artist id.  Deafualts to NULL.  Only use this or query
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of track data, including the duration, track id and name, explicitness, popularity, track number in its album, album name and id, and artist name and id
 #' @examples
 #' \dontrun{
 #' get_artist_top_tracks("0du5cEVh5yTK9QJze8zA0C")
+#' get_artist_top_tracks("Bruno Mars")
 #' }
 #' @export
-get_artist_top_tracks <- function(id, authorization = get_spotify_access_token()){
+get_artist_top_tracks <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
+    if(!is.null(query)) {
+        search <- search_spotify(query, "artist", authorization = authorization)
+        id <- as.vector(search$id)
+    }
     url <- stringr::str_glue("https://api.spotify.com/v1/artists/{id}/top-tracks")
     parameters = list(
         market = "US",
@@ -396,3 +451,4 @@ get_artist_top_tracks <- function(id, authorization = get_spotify_access_token()
 
     result
 }
+View(get_artist_top_tracks("Bruno Mars"))

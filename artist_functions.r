@@ -1,20 +1,14 @@
 #' @title Search for Spotify artist information
-#' @param queries - A String vector of artist names, taken from the search_spotify() function.  Defaults to NULL.  Only use this or ids
-#' @param ids - A vector of Spotify artist ids.  Defaults to NULL.  Only use this or queries
+#' @param ids - A vector of Spotify artist ids
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of artist data, including artist name and id, genres of the artist, artist popularity, and the total number of followers on spotify
 #' @examples
 #' \dontrun{
 #' get_artists("0du5cEVh5yTK9QJze8zA0C")
 #' get_artists(c("0du5cEVh5yTK9QJze8zA0C", "6PvvGcCY2XtUcSRld1Wilr"))
-#' get_artists(c("Bruno Mars", "Anderson .Paak"))
 #' }
 #' @export
-get_artists <- function(queries = NULL, ids = NULL, authorization = get_spotify_access_token()){
-    if(!is.null(queries)) {
-        search <- search_spotify(queries, "artist", authorization = authorization)
-        ids <- as.vector(search$id)
-    }
+get_artists <- function(ids, authorization = get_spotify_access_token()){
     url <- "https://api.spotify.com/v1/artists"
     parameters <- list(
     access_token = authorization
@@ -65,8 +59,7 @@ get_artists <- function(queries = NULL, ids = NULL, authorization = get_spotify_
 }
 
 #' @title Search for Spotify artist audio feature information
-#' @param query - A single artist name.  Defaults to NULL.  Only put this or id
-#' @param id - A single Spotify artist id.  Defaults to NULL.  Only put this or query
+#' @param id - A single Spotify artist id
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of artist track data, including the artist name and id, project id and name, release_date, track name and id, key and mode, and each of the following variables:
 #'        danceability
@@ -82,18 +75,17 @@ get_artists <- function(queries = NULL, ids = NULL, authorization = get_spotify_
 #' @examples
 #' \dontrun{
 #' get_artist_audio_features("0du5cEVh5yTK9QJze8zA0C")
-#' get_artist_audio_features("Bruno Mars")
 #' }
 #' @export
-get_artist_audio_features <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
-    info <- get_artists(queries = query, ids = id, authorization = authorization)
+get_artist_audio_features <- function(id, authorization = get_spotify_access_token()){
+    info <- get_artists(id, authorization = authorization)
     artist_id <- info$artist_id
     artist_name <- info$name
     if(is.null(artist_id)){
         stop("No artist found with inputed ID.  Please try again with a different ID.")
     }
     albums <- get_artist_projects(artist_id, authorization = authorization)
-    if (is.null(albums) || length(albums)==0) {
+    if (is.null(albums) | length(albums)==0) {
         stop("No albums found with inputed ID.  Please try again with a different ID.")
     }
     num_loops <- ceiling(nrow(albums) / 50)
@@ -172,8 +164,7 @@ get_artist_audio_features <- function(query = NULL, id = NULL, authorization = g
 }
 
 #' @title Search for Spotify artist feature summary
-#' @param query - A single artist name.  Defaults to NULL.  Only use this or id
-#' @param id - A single Spotify artist id.  Defaults to NULL.  Only use this or id
+#' @param id - A single Spotify artist id
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of artist summary data, including artist name and id, number of songs from the artist, and the mean and standard deviation for:
 #'        danceability
@@ -190,14 +181,13 @@ get_artist_audio_features <- function(query = NULL, id = NULL, authorization = g
 #' @examples
 #' \dontrun{
 #' get_artist_summary("0du5cEVh5yTK9QJze8zA0C")
-#' get_artist_summary("Bruno Mars")
 #' }
 #' @export
-get_artist_summary <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
-    artist <- get_artists(queries = query, ids = id, authorization = authorization) %>% 
+get_artist_summary <- function(id, authorization = get_spotify_access_token()){
+    artist <- get_artists(id, authorization) %>% 
               dplyr::select(artist_name, artist_id)
 
-    features <- get_artist_audio_features(query = query, id = id, authorization = authorization)
+    features <- get_artist_audio_features(id, authorization = authorization)
 
     songs <- features %>%
              dplyr::mutate(num_songs = dplyr::n()) %>%
@@ -215,8 +205,7 @@ get_artist_summary <- function(query = NULL, id = NULL, authorization = get_spot
 }
 
 #' @title Search for Spotify artists feature summary
-#' @param queries - A String vector of artist names, taken from the search_spotify() function.  Defaults to NULL.  Only use this or ids
-#' @param ids - A vector of Spotify artist ids.  Defaults to NULL.  Only use this or queries
+#' @param ids - A vector of Spotify artist ids
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of artist summary data, including artist name and id, number of songs from the artist, and the mean and standard deviation for:
 #'        danceability
@@ -233,33 +222,22 @@ get_artist_summary <- function(query = NULL, id = NULL, authorization = get_spot
 #' @examples
 #' \dontrun{
 #' get_artists_summary(c("0du5cEVh5yTK9QJze8zA0C", "6PvvGcCY2XtUcSRld1Wilr"))
-#' get_artists_summary(c("Bruno Mars", "Anderson .Paak"))
 #' }
 #' @export
-get_artists_summary <- function(queries = NULL, ids = NULL, authorization = get_spotify_access_token()) {
-    if(!is.null(queries)){
-        purrr::map_dfr(queries, ~ get_artist_summary(query = .x, authorization = authorization))
-    } else{
-        purrr::map_dfr(ids, ~ get_artist_summary(id = .x, authorization = authorization))
-    }
+get_artists_summary <- function(ids, authorization = get_spotify_access_token()) {
+  purrr::map_dfr(ids, ~ get_artist_summary(.x, authorization = authorization))
 }
 
 #' @title Search for Spotify related artists
-#' @param query - A single artist name.  Defaults to NULL.  Only use this or id
-#' @param id - A single Spotify artist id.  Defaults to NULL.  Only use this or id
+#' @param id - A single Spotify artist id
 #' @param authorization - An access_token generated from the get_spotify_access_token() function
 #' @return A dataframe of related artist data, including the artist genres, artist id and name, popularity, and number of followers
 #' @examples
 #' \dontrun{
 #' get_related_artists("0du5cEVh5yTK9QJze8zA0C")
-#' get_related_artists("Bruno Mars")
 #' }
 #' @export
-get_related_artists <- function(query = NULL, id = NULL, authorization = get_spotify_access_token()){
-    if(!is.null(query)) {
-        search <- search_spotify(query, "artist", authorization = authorization)
-        id <- as.vector(search$id)
-    }
+get_related_artists <- function(id, authorization = get_spotify_access_token()){
     url <- stringr::str_glue("https://api.spotify.com/v1/artists/{id}/related-artists")
 
     parameters <- list(

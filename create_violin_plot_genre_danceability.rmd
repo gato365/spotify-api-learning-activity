@@ -34,14 +34,18 @@ create_violin_plot_genre_danceability <- function(genres, limit=20, authorizatio
 }
 ```
 
+```{r}
+create_violin_plot_genre_danceability(c("hip-hop","pop","rock"), limit=50)
+```
+
 
 All Code Required Beforehand:
 ```{r}
 library(spotifyr)
 library(tidyverse)
 
-Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+Sys.setenv(SPOTIFY_CLIENT_ID = 'f995a310ad724cd49e6eb7a8736e7b19')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = '9e60ab8050b945558219098bc9470925')
 
 access_token <- get_spotify_access_token()
 

@@ -1,0 +1,22 @@
+---
+title: "Spotify R Visualizations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry(Spotify R Visualizations)
+  %\VignetteEngine(knitr::rmarkdown)
+  %\VignetteEncoding(UTF-8)
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  comment = "#>")
+```
+
+```{r}
+devtools::install_github("AdamDelRio/SpotifyProject")
+```
+
+```{r}
+
+```

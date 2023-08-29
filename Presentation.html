@@ -28,71 +28,6 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
-    /* CSS for syntax highlighting */
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      { color: #003b4f; background-color: #f1f3f5; }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span { color: #003b4f; } /* Normal */
-    code span.al { color: #ad0000; } /* Alert */
-    code span.an { color: #5e5e5e; } /* Annotation */
-    code span.at { color: #657422; } /* Attribute */
-    code span.bn { color: #ad0000; } /* BaseN */
-    code span.bu { } /* BuiltIn */
-    code span.cf { color: #003b4f; } /* ControlFlow */
-    code span.ch { color: #20794d; } /* Char */
-    code span.cn { color: #8f5902; } /* Constant */
-    code span.co { color: #5e5e5e; } /* Comment */
-    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
-    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
-    code span.dt { color: #ad0000; } /* DataType */
-    code span.dv { color: #ad0000; } /* DecVal */
-    code span.er { color: #ad0000; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #ad0000; } /* Float */
-    code span.fu { color: #4758ab; } /* Function */
-    code span.im { color: #00769e; } /* Import */
-    code span.in { color: #5e5e5e; } /* Information */
-    code span.kw { color: #003b4f; } /* Keyword */
-    code span.op { color: #5e5e5e; } /* Operator */
-    code span.ot { color: #003b4f; } /* Other */
-    code span.pp { color: #ad0000; } /* Preprocessor */
-    code span.sc { color: #5e5e5e; } /* SpecialChar */
-    code span.ss { color: #20794d; } /* SpecialString */
-    code span.st { color: #20794d; } /* String */
-    code span.va { color: #111111; } /* Variable */
-    code span.vs { color: #20794d; } /* VerbatimString */
-    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="Presentation_files/libs/revealjs/dist/theme/quarto.css">
   <link href="Presentation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
@@ -463,26 +398,73 @@
 </section>
 <section id="visualizations" class="slide level2">
 <h2>Visualizations</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># Billie Eilish</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">create_violin_plot_album_danceability</span>(<span class="st">"6qqNVTkY8uBg9cP3Jd7DAH"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># Ken Carson</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="fu">create_violin_plot_album_danceability</span>(<span class="st">"3gBZUcNeVumkeeJ19CY2sX"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Travis Scott</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="fu">create_violin_plot_album_danceability</span>(<span class="st">"0Y5tJX1MQlPlqiwlOH1tJY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Kanye West</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="fu">create_violin_plot_album_danceability</span>(<span class="st">"5K4W6rqBFWDnAN6FQUkS6x"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Bruno Mars</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="fu">create_violin_plot_album_danceability</span>(<span class="st">"0du5cEVh5yTK9QJze8zA0C"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<!-- ```{r, echo = FALSE} -->
+<!-- Sys.setenv(SPOTIFY_CLIENT_ID = 'f995a310ad724cd49e6eb7a8736e7b19') -->
+<!-- Sys.setenv(SPOTIFY_CLIENT_SECRET = '9e60ab8050b945558219098bc9470925') -->
+<!-- access_token <- get_spotify_access_token() -->
+<!-- ``` -->
+<!-- ```{r, echo = FALSE} -->
+<!-- create_violin_plot_album_danceability <- function(artist_id, limit = 7, authorization = get_spotify_access_token()) { -->
+<!--     df_artist <- get_artist_audio_features(artist_id, authorization = authorization) -->
+<!--     album_names <- unique(df_artist$album_name)[1:limit] -->
+<!--     # only keep rows of data frame where album name is one of the names in album_names; -->
+<!--     df_artist <- df_artist[df_artist$album_name %in% album_names, ] -->
+<!--     # not based on size of input, but rather number of rows of df; -->
+<!--     # if (nrow(df_artist) <= 5) -->
+<!--     if(length(album_names) <= 5) { -->
+<!--       # Can also try total characters divided by 10 to create ratio requirement; Maybe; -->
+<!--       if (any(nchar(unique(df_artist$album_name)) > 10)) { -->
+<!--         gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + -->
+<!--                 ggplot2::geom_violin(aes(fill = album_name)) + -->
+<!--                 # can use springf or paste; equivalent of {} for var in string; -->
+<!--                 labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") + -->
+<!--                 theme(plot.title = element_text(hjust = 0.5), -->
+<!--                       axis.text.x=element_blank(), -->
+<!--                       axis.ticks.x=element_blank() -->
+<!--                       ) + -->
+<!--                 stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red") -->
+<!--       } else { -->
+<!--         gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + -->
+<!--                 ggplot2::geom_violin(aes(fill = album_name)) + -->
+<!--                 # can use sprintf or paste; equivalent of {} for var in string; -->
+<!--                 labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "Album", y = "Danceability", fill = "Album") + -->
+<!--                 theme(plot.title = element_text(hjust = 0.5)) + -->
+<!--                 stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red") -->
+<!--         } -->
+<!--     } -->
+<!--     else { -->
+<!--       gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  + -->
+<!--               ggplot2::geom_violin(aes(fill = album_name)) + -->
+<!--               labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") + -->
+<!--               theme(plot.title = element_text(hjust = 0.5), -->
+<!--                     axis.text.x=element_blank(), -->
+<!--                     axis.ticks.x=element_blank() -->
+<!--                     ) + -->
+<!--               stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red") -->
+<!--     } -->
+<!--     plotly::ggplotly(gg) -->
+<!-- } -->
+<!-- ``` -->
+<!-- ```{r, echo = TRUE} -->
+<!-- # Billie Eilish -->
+<!-- create_violin_plot_album_danceability("6qqNVTkY8uBg9cP3Jd7DAH") -->
+<!-- ``` -->
+<!-- ```{r, echo = TRUE} -->
+<!-- # Ken Carson -->
+<!-- create_violin_plot_album_danceability("3gBZUcNeVumkeeJ19CY2sX") -->
+<!-- ``` -->
+<!-- ```{r, echo = TRUE} -->
+<!-- # Travis Scott -->
+<!-- create_violin_plot_album_danceability("0Y5tJX1MQlPlqiwlOH1tJY") -->
+<!-- ``` -->
+<!-- ```{r, echo = TRUE} -->
+<!-- # Kanye West -->
+<!-- create_violin_plot_album_danceability("5K4W6rqBFWDnAN6FQUkS6x") -->
+<!-- ``` -->
+<!-- ```{r, echo = TRUE} -->
+<!-- # Bruno Mars -->
+<!-- create_violin_plot_album_danceability("0du5cEVh5yTK9QJze8zA0C") -->
+<!-- ``` -->
 </section></section>
 <section>
 <section id="conclusions" class="title-slide slide level1 center">

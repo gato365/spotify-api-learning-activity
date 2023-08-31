@@ -391,7 +391,7 @@ get_album_summary <- function(id, authorization = get_spotify_access_token()){
 }
 ```
 
-<!-- !! NOTE: On Emily's Computer, Uncomment PLOTLY Part to allow for points on graph!! -->
+<!-- !! NOTE: On Emily's Computer, Uncomment PLOTLY Part to allow for points on graph + Delete the p1 part at the end of ggplot!! -->
 ```{r, echo = FALSE}
 create_artist_album_valence_energy_visual <- function(artist_id, limit = 5, authorization = get_spotify_access_token()) {
     if (limit > 5){

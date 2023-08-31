@@ -489,6 +489,7 @@ create_artist_album_valence_energy_visual <- function(artist_id, limit = 5, auth
 }
 ```
 
+__Taylor Swift Albums__
 ```{r}
 # Taylor Swift
 create_artist_album_valence_energy_visual("06HL4z0CvFAxyc27GXpf02")

@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="Presentation_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Presentation_files/libs/quarto-html/tabby.min.js"></script>
-<script src="Presentation_files/libs/quarto-html/popper.min.js"></script>
-<script src="Presentation_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="Presentation_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Presentation_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="Presentation_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
-<link href="Presentation_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="Presentation_kx_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Presentation_kx_files/libs/quarto-html/tabby.min.js"></script>
+<script src="Presentation_kx_files/libs/quarto-html/popper.min.js"></script>
+<script src="Presentation_kx_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="Presentation_kx_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Presentation_kx_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="Presentation_kx_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="Presentation_kx_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.3.353">
 
   <title>Spotify API with R</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="Presentation_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="Presentation_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="Presentation_kx_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="Presentation_kx_files/libs/revealjs/dist/reveal.css">
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -28,77 +28,12 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
-    /* CSS for syntax highlighting */
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      { color: #003b4f; background-color: #f1f3f5; }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span { color: #003b4f; } /* Normal */
-    code span.al { color: #ad0000; } /* Alert */
-    code span.an { color: #5e5e5e; } /* Annotation */
-    code span.at { color: #657422; } /* Attribute */
-    code span.bn { color: #ad0000; } /* BaseN */
-    code span.bu { } /* BuiltIn */
-    code span.cf { color: #003b4f; } /* ControlFlow */
-    code span.ch { color: #20794d; } /* Char */
-    code span.cn { color: #8f5902; } /* Constant */
-    code span.co { color: #5e5e5e; } /* Comment */
-    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
-    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
-    code span.dt { color: #ad0000; } /* DataType */
-    code span.dv { color: #ad0000; } /* DecVal */
-    code span.er { color: #ad0000; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #ad0000; } /* Float */
-    code span.fu { color: #4758ab; } /* Function */
-    code span.im { color: #00769e; } /* Import */
-    code span.in { color: #5e5e5e; } /* Information */
-    code span.kw { color: #003b4f; } /* Keyword */
-    code span.op { color: #5e5e5e; } /* Operator */
-    code span.ot { color: #003b4f; } /* Other */
-    code span.pp { color: #ad0000; } /* Preprocessor */
-    code span.sc { color: #5e5e5e; } /* SpecialChar */
-    code span.ss { color: #20794d; } /* SpecialString */
-    code span.st { color: #20794d; } /* String */
-    code span.va { color: #111111; } /* Variable */
-    code span.vs { color: #20794d; } /* VerbatimString */
-    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="Presentation_files/libs/revealjs/dist/theme/quarto.css">
-  <link href="Presentation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="Presentation_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="Presentation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="Presentation_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link rel="stylesheet" href="Presentation_kx_files/libs/revealjs/dist/theme/quarto.css">
+  <link href="Presentation_kx_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="Presentation_kx_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="Presentation_kx_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="Presentation_kx_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
 
   .callout {
@@ -436,94 +371,248 @@
 </section>
 <section id="just-api-call" class="slide level2 smaller">
 <h2>Just API Call</h2>
-<pre><code>Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+<p><strong>Example</strong></p>
+<pre><code>API Call Template 
 
-Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+get_artist example
+Load packages. httr, jsonlite, and magrittr.
+Log onto Spotify Developer App and create an app to retrieve you “Client ID” and “Client Secret” within the settings.
+Set the environment with “Client ID” and “Client Secret”. 
+As: 
+Sys.setenv(SPOTIFY_CLIENT_ID =’'XXXXXXXXXXXXXXXXXXXX')
+Sys.setenv(SPOTIFY_CLIENT_SECRET =’'XXXXXXXXXXXXXXXXXXXX')
 
-access_token &lt;- get_spotify_access_token()</code></pre>
+Access Token Retrieval:
+post &lt;- RETRY(verb = "POST",
+url ="https://accounts.spotify.com/api/token",
+accept_json(),
+authenticate(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET),
+body = list(grant_type = "client_credentials"),
+encode = "form") %&gt;%
+content 
+
+access_token &lt;- post$access_token
+
+Retry function is used to create the GET request. It retries the request in case of failure.
+Retry uses the parameters: verb, url, accept_json, authenticate, body, encode, and config.
+Verbs are the request method. In this example the “POST” method is used to submit data to a server. The common options for verbs are GET, POST, PUT, DELETE. 
+The specified URL is used as an endpoint to retrieve the requested data when given the correct credentials.
+accept_json is used to indicate response type needed
+authenticate creates request headers that contain your private information
+body parameter includes a list of ‘grant_type=”client_credentials” ‘ which is requesting for the access token. 
+encode makes sure that the data provided in the body is in the right format for the server to understand
+
+content is used to extract the information from the post object. 
+
+API Call:
+
+Create parameters that include a list of just access_token.
+
+parameters &lt;- list(
+access_token = access_token
+)
+
+Name endpoint as “artist_url”. 
+Base artist structure: “https://api.spotify.com/v1/artists”, where adding specific artist ID creates desired endpoint
+eg: artist_url &lt;- "https://api.spotify.com/v1/artists/6PvvGcCY2XtUcSRld1Wilr"
+
+Use RETRY function to make API call. Must include:
+Verb: get is used to retrieve data from the server. 
+url
+query with “parameters”
+encode as json since the server receives requests in json format
+Content to receive embedded information from res object. Content function is used to convert res into a readable character vector. 
+fromJSON uses flatten to turn nested data frames into a single non-nested data frame. 
+
+Eg: 
+res &lt;- RETRY(
+verb = "GET",
+url = artist_url,
+query = parameters,
+encode = "JSON"
+) %&gt;% content(res, as = 'text')%&gt;% fromJSON</code></pre>
 </section>
 <section id="function-with-api-call" class="slide level2 smaller">
 <h2>Function with API Call</h2>
-<pre><code>get_artist_summary &lt;- function(id, authorization = get_spotify_access_token()){
-    artist &lt;- get_artists(id, authorization) %&gt;% 
-              dplyr::select(artist_name, artist_id)
+<p><strong>Example</strong></p>
+<pre><code>API Function Call Template 
 
-    features &lt;- get_artist_audio_features(id, authorization = authorization)
+get_* &lt;- function(required_inputs, not required_inputs, authorization)
 
-    songs &lt;- features %&gt;%
-             dplyr::mutate(num_songs = dplyr::n()) %&gt;%
-             dplyr::select(artist_name, num_songs)
-    
-    result &lt;- dplyr::left_join(artist, songs, by = "artist_name") %&gt;%
-              dplyr::slice(1)
-    
-    summary &lt;- features %&gt;%
-               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, explicit, tempo, duration_ms, mode) %&gt;%
-               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = mean, sd = sd), na.rm = TRUE))
+url: https://api.spotify.com/v1/part 1/part 2 (optional)/part3 (optional)/{part 4 (optional id)}/part 5 (optional)
 
-    result &lt;- merge(result, summary)
-    result
-}</code></pre>
+#give an example of different URLs
+
+Designated URL that access the requested information from Spotify. The URL usually starts with a starter URL of “https://api.spotify.com/v1/”. Based on the desired URL destination, more parts can be added to the starter URL.
+
+URL Breakdown: 
+
+https: Hypertext Transfer Protocol Secure. Connects data between your device and the Spotify API server.
+
+api.spotify.com: The location of the API server.
+
+/v1: Version number of the API. 
+
+validate: validate_parameters(artists_or_tracks = artists_or_tracks, artist_or_user = artist_or_user, market = market, country = country, limit = limit, offset = offset, locale = locale, volume_percent = volume_percent, time_range = time_range, position_ms = position_ms, state = state, include_meta_info = include_meta_info)
+
+validate_parameters function taken from the spotifyr package. Verifies whether parameters are in proper format. Not all parameters given above are needed depending on desired function. 
+
+params: params &lt;- list(  )
+
+Create a list of data needed to be retrieved from Spotify. 
+
+retry: res &lt;- httr::RETRY('GET', url,
+       query = params,
+       config(token = authorization)
+       terminate_on = c(401, 403, 404),
+       encode = 'json')
+
+Use the RETRY function from the httr package. Includes “GET” retrieves data from the URL. The query requests for specific information from the params. Since the params includes the access token, it is using your specific access token to access spotify data. For functions that use an authorization code, the retry function call must include “config(token=authorization)” to allow access to authorize the use of personal information. Terminate handles any status codes that are “non-recoverable”. The 401 status code comes from failed authorization, the 403 indicates a forbidden request even after authentication, and the 404 indicates that the server is not found. Encode turns the requested data from JSON format into a R list.
+
+
+fromJSON: res &lt;- jsonlite::fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+
+The content function is used to extract information from the API output. The “as=’text’” is used to indicate that the content is extracted as a string. The encoding is in the most common “UTF-8” format. Next, with the fromJSON function, it takes a string in JSON format and converts it to an R object.</code></pre>
 </section>
 <section id="functions-that" class="slide level2">
 <h2>Functions that</h2>
-<ol type="1">
-<li>Make API Call</li>
-<li>Performs something else
-<ol type="1">
-<li>Manipulation</li>
-<li>Select</li>
-<li>Filter</li>
-<li>Visualize</li>
-</ol></li>
-</ol>
-</section>
-<section class="slide level2">
+<div class="two-column">
+<div class="left-column">
+<pre><code>1.  Make API Call
+2.  Performs something else
+  1.  Manipulation
+  2.  Select
+  3.  Filter
+  4.  Visualize</code></pre>
+</div>
+<div class="right-column">
+<pre><code>Data Manipulation Template
 
-<p><strong>Example: Function that Visualizes</strong></p>
-<pre><code>create_violin_plot_album_danceability &lt;- function(artist_id, limit = 7, authorization = get_spotify_access_token()) {
-    df_artist &lt;- get_artist_audio_features(artist_id, authorization = authorization)
+Filter Function
+*part of “dplyr” library 
+Use: filters for specific information within a dataframe
 
-    album_names &lt;- unique(df_artist$album_name)[1:limit]
+Create a data frame using “data.frame” after getting API call results. Not needed if using a function that expects multiple rows of data.
+eg: get_artist dataframe
 
-    # only keep rows of data frame where album name is one of the names in album_names;
-    df_artist &lt;- df_artist[df_artist$album_name %in% album_names, ]
+df &lt;- data.frame(
+followers = res$followers$total,
+genres = res$genres,
+href = res$href,
+id= res$id,
+popularity = res$popularity,
+name=res$name,
+type=res$type
+)
 
-    # not based on size of input, but rather number of rows of df;
-    # if (nrow(df_artist) &lt;= 5)
-    if(length(album_names) &lt;= 5) {
-      # Can also try total characters divided by 10 to create ratio requirement; Maybe;
-      if (any(nchar(unique(df_artist$album_name)) &gt; 10)) {
-        gg &lt;- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-                ggplot2::geom_violin(aes(fill = album_name)) +
-                # can use springf or paste; equivalent of {} for var in string;
-                labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") +
-                theme(plot.title = element_text(hjust = 0.5),
-                      axis.text.x=element_blank(),
-                      axis.ticks.x=element_blank()
-                      ) +
-                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-      } else {
-        gg &lt;- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-                ggplot2::geom_violin(aes(fill = album_name)) +
-                # can use sprintf or paste; equivalent of {} for var in string;
-                labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "Album", y = "Danceability", fill = "Album") +
-                theme(plot.title = element_text(hjust = 0.5)) +
-                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-        }
-    }
-    else {
-      gg &lt;- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-              ggplot2::geom_violin(aes(fill = album_name)) +
-              labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") +
-              theme(plot.title = element_text(hjust = 0.5),
-                    axis.text.x=element_blank(),
-                    axis.ticks.x=element_blank()
-                    ) +
-              stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-    }
-    plotly::ggplotly(gg)
-}</code></pre>
+*If there are multiple genres for a single artist, use the “group_by”, “summarise”, and “ungroup” function to create a single row rather than multiple with the same artist.
+Eg:
+
+df_combined &lt;- df %&gt;%
+group_by(followers, href, id, popularity, type,name) %&gt;%
+summarise(
+genres = paste(genres, collapse = ", ")
+) %&gt;%
+ungroup()
+
+Use filter in the syntax: df_combined %&gt;% filter(popularity == 70)
+eg: 
+
+Before filter:
+After filter:
+
+
+No results since the popularity of the original data frame is 78.
+
+Other filter capabilities:
+
+Adding multiple filters on different variables: 
+df_combined %&gt;% filter(popularity == 70,type==”artist”)
+
+Different operators:
+    ==: equal to 
+    &lt;=: less than or equal to
+    &gt;=: greater than or equal to
+    !=: not equal to 
+
+“between” helper function:
+    df_combined %&gt;% filter(between(popularity,10,78))
+
+select() function
+*part of “dplyr” library 
+Use: selects certain columns on dataframe
+
+Prepare a data frame. Refer to step 1 of the filter function. 
+Versions of select:
+Selecting columns based on name
+eg: df_combined %&gt;% select(id, name)
+
+Before select:
+After select:
+
+
+
+
+Selecting columns based on position 
+eg: df_combined %&gt;% select(1, 2)
+
+Before select:
+After select:
+
+
+Selecting columns by index range 
+eg: df_combined %&gt;% select(1:4)
+Before select:
+
+After select:
+
+
+
+Selecting columns to remove
+eg: df_combined %&gt;% select(-c(name,id))
+
+Before select:
+
+After select:
+
+
+
+
+Selecting columns between variables by name
+eg: df_combined %&gt;% select(id:type)
+
+Before select:
+
+After select:
+
+
+
+Mutate 
+Creating a new column using arithmetic from previous columns, keeping all columns
+eg: df_combined %&gt;% mutate(new_column=popularity+followers)
+
+Before mutate:
+After mutate:</code></pre>
+</div>
+</div>
+<div class="cell">
+<style type="text/css">
+.two-column {
+  display: flex;
+}
+
+.left-column {
+  flex: 1;
+  padding-right: 20px;
+}
+
+.right-column {
+  flex: 1;
+  text-align: right;
+}
+</style>
+</div>
+<!-- NOTE: Screenshots on Google Docs of before and after unavaialble -->
 </section></section>
 <section>
 <section id="applications-rshiny" class="title-slide slide level1 center">
@@ -580,166 +669,106 @@ access_token &lt;- get_spotify_access_token()</code></pre>
 </section>
 <section id="visualizations" class="slide level2">
 <h2>Visualizations</h2>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="Presentation_files/figure-revealjs/unnamed-chunk-7-1.png" width="960"></p>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Albums: Taylor Swift</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="fu">create_violin_plot_album_danceability</span>(<span class="st">"06HL4z0CvFAxyc27GXpf02"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img data-src="Presentation_files/figure-revealjs/unnamed-chunk-8-1.png" width="960"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="Presentation_files/figure-revealjs/unnamed-chunk-10-1.png" width="960"></p>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>               genres
-1            acoustic
-2            afrobeat
-3            alt-rock
-4         alternative
-5             ambient
-6               anime
-7         black-metal
-8           bluegrass
-9               blues
-10          bossanova
-11             brazil
-12          breakbeat
-13            british
-14           cantopop
-15      chicago-house
-16           children
-17              chill
-18          classical
-19               club
-20             comedy
-21            country
-22              dance
-23          dancehall
-24        death-metal
-25         deep-house
-26     detroit-techno
-27              disco
-28             disney
-29      drum-and-bass
-30                dub
-31            dubstep
-32                edm
-33            electro
-34         electronic
-35                emo
-36               folk
-37              forro
-38             french
-39               funk
-40             garage
-41             german
-42             gospel
-43               goth
-44          grindcore
-45             groove
-46             grunge
-47             guitar
-48              happy
-49          hard-rock
-50           hardcore
-51          hardstyle
-52        heavy-metal
-53            hip-hop
-54           holidays
-55         honky-tonk
-56              house
-57                idm
-58             indian
-59              indie
-60          indie-pop
-61         industrial
-62            iranian
-63            j-dance
-64             j-idol
-65              j-pop
-66             j-rock
-67               jazz
-68              k-pop
-69               kids
-70              latin
-71             latino
-72              malay
-73           mandopop
-74              metal
-75         metal-misc
-76          metalcore
-77     minimal-techno
-78             movies
-79                mpb
-80            new-age
-81        new-release
-82              opera
-83             pagode
-84              party
-85    philippines-opm
-86              piano
-87                pop
-88           pop-film
-89       post-dubstep
-90          power-pop
-91  progressive-house
-92         psych-rock
-93               punk
-94          punk-rock
-95              r-n-b
-96          rainy-day
-97             reggae
-98          reggaeton
-99          road-trip
-100              rock
-101       rock-n-roll
-102        rockabilly
-103           romance
-104               sad
-105             salsa
-106             samba
-107         sertanejo
-108        show-tunes
-109 singer-songwriter
-110               ska
-111             sleep
-112        songwriter
-113              soul
-114       soundtracks
-115           spanish
-116             study
-117            summer
-118           swedish
-119         synth-pop
-120             tango
-121            techno
-122            trance
-123          trip-hop
-124           turkish
-125          work-out
-126       world-music</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="Presentation_files/figure-revealjs/unnamed-chunk-14-1.png" width="960"></p>
-</div>
-</div>
+<!-- Check If These Work: Valence + Radar Plot -->
+<h3 id="valence-vs-energy-plot-artist-album">Valence vs Energy Plot: Artist Album</h3>
+<!-- !! NOTE: On Emily's Computer, Uncomment PLOTLY Part to allow for points on graph!! -->
+
+<img data-src="Presentation_kx_files/figure-revealjs/unnamed-chunk-9-1.png" width="960" class="r-stretch"></section>
+<section id="radar-plot-example-artists" class="slide level2">
+<h2>Radar Plot Example: Artists</h2>
+<!-- Uncomment Adam's Part: get_artist_summary not work on Ken computer; -->
+<!-- ```{r, echo = FALSE} -->
+<!-- get_artists_summary <- function(ids, authorization = get_spotify_access_token()) { -->
+<!--   purrr::map_dfr(ids, ~ get_artist_summary(.x, authorization = authorization)) -->
+<!-- } -->
+<!-- ``` -->
+<!-- ```{r, echo = FALSE} -->
+<!-- create_average_artists_radar_chart <- function(artists, vars = c(), authorization = get_spotify_access_token()){ -->
+<!--   if (length(artists) > 5){ -->
+<!--     stop("Please input only 5 or less artists!") -->
+<!--   } -->
+<!--   colors = c("#6B8E23", "#89A8E0", "#A291B5", "#BCCC9A", "#D3D3D3") -->
+<!--   create_beautiful_radarchart <- function(data, color = "#00AFBB",  -->
+<!--                                         vlabels = colnames(data), vlcex = 0.7, -->
+<!--                                         caxislabels = NULL, title = NULL, ...){ -->
+<!--     fmsb::radarchart( -->
+<!--       data, axistype = 1, -->
+<!--       # Customize the polygon -->
+<!--       pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1, -->
+<!--       # Customize the grid -->
+<!--       cglcol = "grey", cglty = 1, cglwd = 0.8, -->
+<!--       # Customize the axis -->
+<!--       axislabcol = "grey",  -->
+<!--       # Variable labels -->
+<!--       vlcex = vlcex, vlabels = vlabels, -->
+<!--       caxislabels = caxislabels, title = title, ... -->
+<!--     ) -->
+<!--   } -->
+<!--   min_max <- data.frame( -->
+<!--     row.names = c("min", "max"), -->
+<!--     valence_mean = c(0, 1), -->
+<!--     energy_mean = c(0, 1), -->
+<!--     speechiness_mean = c(0, 1) -->
+<!--   ) -->
+<!--   if (length(vars) > 0){ -->
+<!--     vars <- paste0(vars, "_mean") -->
+<!--     create_data_frame <- function(var) { -->
+<!--       data.frame( -->
+<!--         var = c(0, 1)   -->
+<!--       ) -->
+<!--     } -->
+<!--     combinations <- purrr::map_dfc(vars, create_data_frame) %>%  -->
+<!--                     dplyr::rename_with(~ vars, dplyr::everything()) -->
+<!--     min_max <- cbind(min_max, combinations) -->
+<!--   } -->
+<!--   artist_summaries <- purrr::map(artists, ~ get_artist_summary(.x, authorization = authorization)) -->
+<!--   final_summary_df <- dplyr::bind_rows(artist_summaries) -->
+<!--   rownames(final_summary_df) <- artists -->
+<!--   final_summary_df <- final_summary_df %>% -->
+<!--                       dplyr::select( -->
+<!--                         valence_mean, -->
+<!--                         energy_mean, -->
+<!--                         speechiness_mean, -->
+<!--                         vars -->
+<!--                       ) -->
+<!--   final_summary_df <- rbind(min_max, final_summary_df)   -->
+<!--   op <- par(mar = c(0, 0, 0, 0)) -->
+<!--   create_beautiful_radarchart( -->
+<!--     data = final_summary_df, caxislabels = c(0, 0.25, 0.50, 0.75, 1), -->
+<!--     color = colors[1:length(artists)], -->
+<!--     vlcex = 1.5 -->
+<!--   ) -->
+<!--   artists <- purrr::map(artists, get_artists) %>%  -->
+<!--     as.data.frame() %>%  -->
+<!--     dplyr::select( -->
+<!--         dplyr::starts_with("artist_name") -->
+<!--     ) -->
+<!--   artists <- tidyr::pivot_longer(artists, cols = dplyr::starts_with("artist_name"),  -->
+<!--                           names_to = "track_names", values_to = "names") -->
+<!--   legend( -->
+<!--     x = "bottom", legend = artists$names, horiz = TRUE, -->
+<!--     bty = "n", pch = 20 , col = colors[1:length(artists)], -->
+<!--     text.col = "black", cex = 1 -->
+<!--     ) -->
+<!--   par(op) -->
+<!-- } -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- # Taylor Swift, Kendrick Lamar, Ray Charles -->
+<!-- create_average_artists_radar_chart(c("06HL4z0CvFAxyc27GXpf02", "2YZyLoL8N0Wb9xBt1NhZWg", "1eYhYunlNJlDoQhtYBvPsi")) -->
+<!-- ``` -->
+</section>
+<section id="violin-plot-example-genres" class="slide level2">
+<h2>Violin Plot Example: Genres</h2>
+<!-- All Code Required Beforehand: Genres -->
+
 <!-- **Valence vs. Energy Plots** -->
 <!-- Album, Artist, Genre -->
 <!-- **Radar Plots** -->
 <!-- Album, Artist, Genre -->
 <!-- **Violin Plots** -->
 <!-- Album, Artist, Genre -->
-</section></section>
+<img data-src="Presentation_kx_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" class="r-stretch"></section></section>
 <section>
 <section id="conclusions" class="title-slide slide level1 center">
 <h1>Conclusions</h1>
@@ -782,19 +811,19 @@ access_token &lt;- get_spotify_access_token()</code></pre>
   </div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="Presentation_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="Presentation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="Presentation_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="Presentation_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="Presentation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="Presentation_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="Presentation_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="Presentation_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="Presentation_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="Presentation_files/libs/revealjs/plugin/math/math.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="Presentation_kx_files/libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>

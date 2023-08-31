@@ -1,0 +1,811 @@
+---
+title: "Spotify API with R"
+format: revealjs
+editor: visual
+---
+
+```{r, echo = FALSE}
+library(quarto)
+library(tidyverse)
+library(palmerpenguins)
+library(revealjs)
+```
+
+# Introduction
+
+<!-- Intro to ourselves and the project itself Creating a package in R using the Spotify API for web developers -->
+
+## Purpose
+
+To create a curriculum about interacting with APIs from templates to understand existing functions and how to create own functions. <!-- through understanding functions and visualizations; --> <!-- for introduction data science students; -->
+
+## What We Had To Learn {.smaller}
+
+1.  Setting Up Environment (Create App from Spotify for Developers, Client ID and Secret)
+2.  Reading and Understanding Spotify R Documentation from charlie86 github
+
+-   exisitng functions, how they work etc.
+
+3.  Use Github as a team of pushing, pulling, syncing, leaving notes
+4.  Creating Unique Plots (Valence vs. Energy, Radar Plot, Violin Plot) + Using Plotly for Interactivity
+5.  Utilizing ChatGPT effectively to problems solve along with Google
+6.  Working closely with a Professor weekly to schedule tasks and give updates
+
+-   Figuring out direction of research and what to spend time on;
+-   Delegation of tasks
+
+7.  Recreating Existing Functions and Creating New Functions (get_summary, etc.)
+8.  Creating packages and testing functions
+9.  Using R Quarto
+
+# Approaches
+
+## Just API Call {.smaller}
+
+```{r}
+# Once adam installs plotly;
+# devtools::install_github("AdamDelRio/SpotifyProject")
+```
+
+```{r, echo = FALSE}
+library(spotifyr)
+library(plotly)
+```
+
+__Example__
+```         
+API Call Template 
+
+get_artist example
+Load packages. httr, jsonlite, and magrittr.
+Log onto Spotify Developer App and create an app to retrieve you “Client ID” and “Client Secret” within the settings.
+Set the environment with “Client ID” and “Client Secret”. 
+As: 
+Sys.setenv(SPOTIFY_CLIENT_ID =’'XXXXXXXXXXXXXXXXXXXX')
+Sys.setenv(SPOTIFY_CLIENT_SECRET =’'XXXXXXXXXXXXXXXXXXXX')
+
+Access Token Retrieval:
+post <- RETRY(verb = "POST",
+url ="https://accounts.spotify.com/api/token",
+accept_json(),
+authenticate(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET),
+body = list(grant_type = "client_credentials"),
+encode = "form") %>%
+content 
+
+access_token <- post$access_token
+
+Retry function is used to create the GET request. It retries the request in case of failure.
+Retry uses the parameters: verb, url, accept_json, authenticate, body, encode, and config.
+Verbs are the request method. In this example the “POST” method is used to submit data to a server. The common options for verbs are GET, POST, PUT, DELETE. 
+The specified URL is used as an endpoint to retrieve the requested data when given the correct credentials.
+accept_json is used to indicate response type needed
+authenticate creates request headers that contain your private information
+body parameter includes a list of ‘grant_type=”client_credentials” ‘ which is requesting for the access token. 
+encode makes sure that the data provided in the body is in the right format for the server to understand
+
+content is used to extract the information from the post object. 
+
+API Call:
+
+Create parameters that include a list of just access_token.
+
+parameters <- list(
+access_token = access_token
+)
+
+Name endpoint as “artist_url”. 
+Base artist structure: “https://api.spotify.com/v1/artists”, where adding specific artist ID creates desired endpoint
+eg: artist_url <- "https://api.spotify.com/v1/artists/6PvvGcCY2XtUcSRld1Wilr"
+
+Use RETRY function to make API call. Must include:
+Verb: get is used to retrieve data from the server. 
+url
+query with “parameters”
+encode as json since the server receives requests in json format
+Content to receive embedded information from res object. Content function is used to convert res into a readable character vector. 
+fromJSON uses flatten to turn nested data frames into a single non-nested data frame. 
+
+Eg: 
+res <- RETRY(
+verb = "GET",
+url = artist_url,
+query = parameters,
+encode = "JSON"
+) %>% content(res, as = 'text')%>% fromJSON
+```
+
+```{r, echo = FALSE}
+Sys.setenv(SPOTIFY_CLIENT_ID = 'f995a310ad724cd49e6eb7a8736e7b19')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = '9e60ab8050b945558219098bc9470925')
+
+access_token <- get_spotify_access_token()
+```
+
+## Function with API Call {.smaller}
+__Example__
+```
+API Function Call Template 
+
+get_* <- function(required_inputs, not required_inputs, authorization)
+
+url: https://api.spotify.com/v1/part 1/part 2 (optional)/part3 (optional)/{part 4 (optional id)}/part 5 (optional)
+
+#give an example of different URLs
+
+Designated URL that access the requested information from Spotify. The URL usually starts with a starter URL of “https://api.spotify.com/v1/”. Based on the desired URL destination, more parts can be added to the starter URL.
+
+URL Breakdown: 
+
+https: Hypertext Transfer Protocol Secure. Connects data between your device and the Spotify API server.
+
+api.spotify.com: The location of the API server.
+
+/v1: Version number of the API. 
+
+validate: validate_parameters(artists_or_tracks = artists_or_tracks, artist_or_user = artist_or_user, market = market, country = country, limit = limit, offset = offset, locale = locale, volume_percent = volume_percent, time_range = time_range, position_ms = position_ms, state = state, include_meta_info = include_meta_info)
+
+validate_parameters function taken from the spotifyr package. Verifies whether parameters are in proper format. Not all parameters given above are needed depending on desired function. 
+
+params: params <- list(  )
+
+Create a list of data needed to be retrieved from Spotify. 
+
+retry: res <- httr::RETRY('GET', url,
+       query = params,
+       config(token = authorization)
+       terminate_on = c(401, 403, 404),
+       encode = 'json')
+
+Use the RETRY function from the httr package. Includes “GET” retrieves data from the URL. The query requests for specific information from the params. Since the params includes the access token, it is using your specific access token to access spotify data. For functions that use an authorization code, the retry function call must include “config(token=authorization)” to allow access to authorize the use of personal information. Terminate handles any status codes that are “non-recoverable”. The 401 status code comes from failed authorization, the 403 indicates a forbidden request even after authentication, and the 404 indicates that the server is not found. Encode turns the requested data from JSON format into a R list.
+
+
+fromJSON: res <- jsonlite::fromJSON(content(res, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+
+The content function is used to extract information from the API output. The “as=’text’” is used to indicate that the content is extracted as a string. The encoding is in the most common “UTF-8” format. Next, with the fromJSON function, it takes a string in JSON format and converts it to an R object.
+```
+
+## Functions that
+
+<div class="two-column">
+  <div class="left-column">
+    1.  Make API Call
+    2.  Performs something else
+      1.  Manipulation
+      2.  Select
+      3.  Filter
+      4.  Visualize
+  </div>
+  <div class="right-column">
+    Data Manipulation Template
+    
+    Filter Function
+    *part of “dplyr” library 
+    Use: filters for specific information within a dataframe
+    
+    Create a data frame using “data.frame” after getting API call results. Not needed if using a function that expects multiple rows of data.
+    eg: get_artist dataframe
+    
+    df <- data.frame(
+    followers = res$followers$total,
+    genres = res$genres,
+    href = res$href,
+    id= res$id,
+    popularity = res$popularity,
+    name=res$name,
+    type=res$type
+    )
+    
+    *If there are multiple genres for a single artist, use the “group_by”, “summarise”, and “ungroup” function to create a single row rather than multiple with the same artist.
+    Eg:
+    
+    df_combined <- df %>%
+    group_by(followers, href, id, popularity, type,name) %>%
+    summarise(
+    genres = paste(genres, collapse = ", ")
+    ) %>%
+    ungroup()
+    
+    Use filter in the syntax: df_combined %>% filter(popularity == 70)
+    eg: 
+    
+    Before filter:
+    After filter:
+    
+    
+    No results since the popularity of the original data frame is 78.
+    
+    Other filter capabilities:
+    
+    Adding multiple filters on different variables: 
+    df_combined %>% filter(popularity == 70,type==”artist”)
+    
+    Different operators:
+    	==: equal to 
+    	<=: less than or equal to
+    	>=: greater than or equal to
+    	!=: not equal to 
+    
+    “between” helper function:
+    	df_combined %>% filter(between(popularity,10,78))
+    
+    select() function
+    *part of “dplyr” library 
+    Use: selects certain columns on dataframe
+    
+    Prepare a data frame. Refer to step 1 of the filter function. 
+    Versions of select:
+    Selecting columns based on name
+    eg: df_combined %>% select(id, name)
+    
+    Before select:
+    After select:
+    
+    
+    
+    
+    Selecting columns based on position 
+    eg: df_combined %>% select(1, 2)
+    
+    Before select:
+    After select:
+    
+    
+    Selecting columns by index range 
+    eg: df_combined %>% select(1:4)
+    Before select:
+    
+    After select:
+    
+    
+    
+    Selecting columns to remove
+    eg: df_combined %>% select(-c(name,id))
+    
+    Before select:
+    
+    After select:
+    
+    
+    
+    
+    Selecting columns between variables by name
+    eg: df_combined %>% select(id:type)
+    
+    Before select:
+    
+    After select:
+    
+    
+    
+    Mutate 
+    Creating a new column using arithmetic from previous columns, keeping all columns
+    eg: df_combined %>% mutate(new_column=popularity+followers)
+    
+    Before mutate:
+    After mutate:
+  </div>
+</div>
+
+```{css echo=FALSE}
+.two-column {
+  display: flex;
+}
+
+.left-column {
+  flex: 1;
+  padding-right: 20px;
+}
+
+.right-column {
+  flex: 1;
+  text-align: right;
+}
+```
+
+<!-- NOTE: Screenshots on Google Docs of before and after unavaialble -->
+
+
+# Applications (RShiny)
+
+## Summaries {.smaller}
+
+__Example 1: Get Album Summary__
+```
+get_album_summary <- function(id, authorization = get_spotify_access_token()){
+    album <- get_albums(id, authorization = authorization)
+
+    tracks <- get_albums_tracks(id, authorization = authorization)
+    
+    features <- get_track_audio_features(tracks$track_id, authorization = authorization)
+    
+    summary <- features %>%
+               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo, duration_ms, mode) %>%
+               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = ~ mean(., na.rm = TRUE), sd = ~ sd(., na.rm = TRUE)), .names = "{.col}_{.fn}"))
+    
+    result <- merge(album, summary) %>% 
+              dplyr::select(-label,
+                            -release_date,
+                            -release_date_precision,
+                            -type,
+                            -artist_id,
+                            -artist_name)
+    result
+}
+```
+
+## 
+
+__Example 2: Get Artist Summary__
+```
+get_artist_summary <- function(id, authorization = get_spotify_access_token()){
+    artist <- get_artists(id, authorization) %>% 
+              dplyr::select(artist_name, artist_id)
+
+    features <- get_artist_audio_features(id, authorization = authorization)
+
+    songs <- features %>%
+             dplyr::mutate(num_songs = dplyr::n()) %>%
+             dplyr::select(artist_name, num_songs)
+    
+    result <- dplyr::left_join(artist, songs, by = "artist_name") %>%
+              dplyr::slice(1)
+    
+    summary <- features %>%
+               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, explicit, tempo, duration_ms, mode) %>%
+               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = mean, sd = sd), na.rm = TRUE))
+
+    result <- merge(result, summary)
+    result
+}
+```
+
+## Visualizations
+
+```{r}
+devtools::install_github("AdamDelRio/SpotifyProject")
+```
+
+<!-- Check If These Work: Valence + Radar Plot -->
+### Valence vs Energy Plot: Artist Album
+```{r, echo = FALSE}
+get_album_summary <- function(id, authorization = get_spotify_access_token()){
+    album <- get_albums(id, authorization = authorization)
+
+    tracks <- get_albums_tracks(id, authorization = authorization)
+    
+    features <- get_track_audio_features(tracks$track_id, authorization = authorization)
+    
+    summary <- features %>%
+               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo, duration_ms, mode) %>%
+               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = ~ mean(., na.rm = TRUE), sd = ~ sd(., na.rm = TRUE)), .names = "{.col}_{.fn}"))
+    
+    result <- merge(album, summary) %>% 
+              dplyr::select(-label,
+                            -release_date,
+                            -release_date_precision,
+                            -type,
+                            -artist_id,
+                            -artist_name)
+    result
+}
+```
+
+<!-- !! NOTE: On Emily's Computer, Uncomment PLOTLY Part to allow for points on graph!! -->
+```{r, echo = FALSE}
+create_artist_album_valence_energy_visual <- function(artist_id, limit = 5, authorization = get_spotify_access_token()) {
+    if (limit > 5){
+    stop("Please input only 5 or less albums!")
+    }
+    album_info <- get_artist_albums(artist_id, limit = limit, authorization = authorization)  
+    album_ids <- album_info$album_id
+    album_names <- album_info$album_name
+    audio_features <- map(album_ids, get_album_summary)
+
+    min_length <- min(length(album_ids), length(album_names), length(audio_features))
+    artist_name <- rep(get_artists(artist_id, authorization = authorization)$artist_name, each = min_length)
+    
+    valence_means <- map_dbl(audio_features, ~ pluck(.x, "valence_mean"))
+    energy_means <- map_dbl(audio_features, ~ pluck(.x, "energy_mean"))
+
+    artist_data <- data.frame(
+        album_id = album_ids[1:min_length],
+        album_name = album_names[1:min_length],
+        artist_name = artist_name[1:min_length],
+        valence_mean = valence_means,
+        energy_mean = energy_means,
+        stringsAsFactors = FALSE
+    )
+  colors = c("#6B8E23", "#89A8E0", "#A291B5", "#BCCC9A", "#D3D3D3")
+
+  if (length(artist_data$album_name) < length(colors)) {
+  colors <- colors[1:length(artist_data$album_name)]
+  }
+
+  # Associate colors with album names
+  artist_colors <- setNames(colors, artist_data$album_name)
+
+  df <- data.frame(x = c(0, 1), y = c(0, 1))
+  alpha_score <- 0.2
+
+  p1 <- df %>%
+    ggplot(aes(x = x, y = y)) +
+    geom_blank() +
+    geom_vline(xintercept = 0.5, linewidth = 1) +
+    geom_hline(yintercept = 0.5, linewidth = 1) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0),
+                       labels = scales::label_number(accuracy = 0.1)) +
+    scale_y_continuous(limits = c(0, 1), expand = c(0, 0))  +
+    theme_bw() +
+    theme(
+      axis.title = element_text(size = 18, face = "bold"),
+      axis.text = element_text(size = 12, face = "bold"),
+      plot.margin = margin(0.3, 0.5, 0.1, 0.5, "cm")
+    ) +
+    geom_rect(aes(xmin = 0, xmax = 0.5, ymin = 0.5, ymax = 1),
+              alpha = alpha_score, fill = "red1") +
+    geom_rect(aes(xmin = 0.5, xmax = 1, ymin = 0.5, ymax = 1),
+              alpha = alpha_score, fill = "violetred1") +
+    geom_rect(aes(xmin = 0, xmax = 0.5, ymin = 0, ymax = 0.5),
+              alpha = alpha_score, fill = "slategray3") +
+    geom_rect(aes(xmin = 0.5, xmax = 1, ymin = 0, ymax = 0.5),
+              alpha = alpha_score, fill = "royalblue2") +
+    labs(x = "Valence", y = "Energy") +
+    # Adjust the font size for annotations
+    annotate("text", x = 0.25, y = 0.25, label = "Sad", size = 5,
+             color = "white") +
+    annotate("text", x = 0.75, y = 0.25, label = "Chill", size = 5,
+             color = "white") +
+    annotate("text", x = 0.25, y = 0.75, label = "Angry", size = 5,
+             color = "white") +
+    annotate("text", x = 0.75, y = 0.75, label = "Happy", size = 5,
+             color = "white")
+
+  combined_data <- bind_rows(artist_data)
+
+  artist_name <- get_artists(artist_id, authorization = authorization)$artist_name
+  
+#   p2 <- ggplotly(p1 + 
+#     geom_point(data = combined_data,  
+#                aes(x = valence_mean, y = energy_mean, color = album_name), size = 3) +
+#     labs(color = "Album Names",
+#          x = "Valence", y = "Energy") +
+#     scale_color_manual(values = artist_colors, labels = (combined_data$album_name)) +
+#     theme(
+#       axis.title = element_text(size = 15, face = "bold"),  # Adjust the size here
+#       axis.text = element_text(size = 7, face = "bold"),
+#       plot.title = element_text(size = 15, face = "bold", hjust = 0.5, margin = margin(b = 20)),
+#       plot.subtitle = element_text(hjust = 0.5, size = 13, face = "bold"),
+#       legend.text = element_text(size = 10),
+#       legend.position = "bottom",
+#       legend.direction = "vertical",
+#       plot.margin = margin(t = 50)
+#     ) +
+#     ggtitle(paste("Album Valence-Energy Visualization\nfor", artist_name)) +
+#     theme(plot.title.position = "plot"))
+#   
+#   p2
+  p1
+}
+```
+
+```{r}
+# Taylor Swift
+create_artist_album_valence_energy_visual("06HL4z0CvFAxyc27GXpf02")
+```
+
+## Radar Plot Example: Artists
+<!-- Uncomment Adam's Part: get_artist_summary not work on Ken computer; -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- get_artists_summary <- function(ids, authorization = get_spotify_access_token()) { -->
+<!--   purrr::map_dfr(ids, ~ get_artist_summary(.x, authorization = authorization)) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- create_average_artists_radar_chart <- function(artists, vars = c(), authorization = get_spotify_access_token()){ -->
+<!--   if (length(artists) > 5){ -->
+<!--     stop("Please input only 5 or less artists!") -->
+<!--   } -->
+<!--   colors = c("#6B8E23", "#89A8E0", "#A291B5", "#BCCC9A", "#D3D3D3") -->
+<!--   create_beautiful_radarchart <- function(data, color = "#00AFBB",  -->
+<!--                                         vlabels = colnames(data), vlcex = 0.7, -->
+<!--                                         caxislabels = NULL, title = NULL, ...){ -->
+<!--     fmsb::radarchart( -->
+<!--       data, axistype = 1, -->
+<!--       # Customize the polygon -->
+<!--       pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1, -->
+<!--       # Customize the grid -->
+<!--       cglcol = "grey", cglty = 1, cglwd = 0.8, -->
+<!--       # Customize the axis -->
+<!--       axislabcol = "grey",  -->
+<!--       # Variable labels -->
+<!--       vlcex = vlcex, vlabels = vlabels, -->
+<!--       caxislabels = caxislabels, title = title, ... -->
+<!--     ) -->
+<!--   } -->
+
+<!--   min_max <- data.frame( -->
+<!--     row.names = c("min", "max"), -->
+<!--     valence_mean = c(0, 1), -->
+<!--     energy_mean = c(0, 1), -->
+<!--     speechiness_mean = c(0, 1) -->
+<!--   ) -->
+
+<!--   if (length(vars) > 0){ -->
+<!--     vars <- paste0(vars, "_mean") -->
+<!--     create_data_frame <- function(var) { -->
+<!--       data.frame( -->
+<!--         var = c(0, 1)   -->
+<!--       ) -->
+<!--     } -->
+
+<!--     combinations <- purrr::map_dfc(vars, create_data_frame) %>%  -->
+<!--                     dplyr::rename_with(~ vars, dplyr::everything()) -->
+
+<!--     min_max <- cbind(min_max, combinations) -->
+<!--   } -->
+
+<!--   artist_summaries <- purrr::map(artists, ~ get_artist_summary(.x, authorization = authorization)) -->
+
+<!--   final_summary_df <- dplyr::bind_rows(artist_summaries) -->
+
+<!--   rownames(final_summary_df) <- artists -->
+
+<!--   final_summary_df <- final_summary_df %>% -->
+<!--                       dplyr::select( -->
+<!--                         valence_mean, -->
+<!--                         energy_mean, -->
+<!--                         speechiness_mean, -->
+<!--                         vars -->
+<!--                       ) -->
+
+<!--   final_summary_df <- rbind(min_max, final_summary_df)   -->
+
+<!--   op <- par(mar = c(0, 0, 0, 0)) -->
+
+<!--   create_beautiful_radarchart( -->
+<!--     data = final_summary_df, caxislabels = c(0, 0.25, 0.50, 0.75, 1), -->
+<!--     color = colors[1:length(artists)], -->
+<!--     vlcex = 1.5 -->
+<!--   ) -->
+
+<!--   artists <- purrr::map(artists, get_artists) %>%  -->
+<!--     as.data.frame() %>%  -->
+<!--     dplyr::select( -->
+<!--         dplyr::starts_with("artist_name") -->
+<!--     ) -->
+<!--   artists <- tidyr::pivot_longer(artists, cols = dplyr::starts_with("artist_name"),  -->
+<!--                           names_to = "track_names", values_to = "names") -->
+<!--   legend( -->
+<!--     x = "bottom", legend = artists$names, horiz = TRUE, -->
+<!--     bty = "n", pch = 20 , col = colors[1:length(artists)], -->
+<!--     text.col = "black", cex = 1 -->
+<!--     ) -->
+
+<!--   par(op) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- # Taylor Swift, Kendrick Lamar, Ray Charles -->
+<!-- create_average_artists_radar_chart(c("06HL4z0CvFAxyc27GXpf02", "2YZyLoL8N0Wb9xBt1NhZWg", "1eYhYunlNJlDoQhtYBvPsi")) -->
+<!-- ``` -->
+
+## Violin Plot Example: Genres
+<!-- All Code Required Beforehand: Genres -->
+```{r}
+library(spotifyr)
+library(tidyverse)
+
+Sys.setenv(SPOTIFY_CLIENT_ID = 'f995a310ad724cd49e6eb7a8736e7b19')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = '9e60ab8050b945558219098bc9470925')
+
+access_token <- get_spotify_access_token()
+
+get_possible_genres <- function(authorization = get_spotify_access_token()){
+    url <- "https://api.spotify.com/v1/recommendations/available-genre-seeds"
+    parameters <- list(
+        access_token = authorization
+    )
+    result = httr::RETRY(verb = "GET", url, query = parameters, encode = "json", terminate_on = c(401, 403, 404))
+    httr::stop_for_status(result)
+    result <- jsonlite::fromJSON(httr::content(result, as = "text", encoding = "UTF-8"), flatten = TRUE)
+    result <- as.data.frame(result)
+    result
+}
+
+get_genre_tracks <- function(genre, limit = 20, offset = 0, authorization = get_spotify_access_token()){
+    url <- "https://api.spotify.com/v1/search"
+    parameters <- list(
+        q = stringr::str_glue('genre:"{genre}"'),
+        type = "track",
+        market = "US",
+        limit = limit,
+        offset = offset,
+        access_token = authorization
+    )
+
+    result <- httr::RETRY("GET", url, query = parameters, encode = "json", terminate_on = c(401, 403, 404))
+
+    httr::stop_for_status(result)
+
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'),
+                    flatten = TRUE)$tracks$items
+
+    result$artists <- purrr::map(result$artists, ~ list(id = .x$id, name = .x$name))
+    result <- result %>% 
+            dplyr::mutate(
+                artist_id = purrr::map_chr(artists, ~ toString(.x$id)),
+                artist_name = purrr::map_chr(artists, ~ toString(.x$name))
+                ) %>%
+            dplyr::select(
+                -artists,
+                -href,
+                -is_local,
+                -is_playable,
+                -preview_url,
+                -disc_number,
+                -uri,
+                -album.artists,
+                -album.href,
+                -album.id,
+                -album.images,
+                -album.is_playable,
+                -album.name,
+                -album.release_date,
+                -album.release_date_precision,
+                -album.total_tracks,
+                -album.type,
+                -album.uri,
+                -album.external_urls.spotify,
+                -external_ids.isrc,
+                -external_urls.spotify
+            ) %>%
+            dplyr::rename(
+                track_id = id,
+                track_name = name,
+                album_type = album.album_type
+            )
+    result
+}
+
+get_track_audio_features <- function(ids, authorization = get_spotify_access_token()){
+    assertthat::assert_that(
+        length(ids) <= 100,
+        msg = "The maximum length of the length of the ids vector is 100.  Please shorten the length of the inputed vector."
+    )
+    url <- 'https://api.spotify.com/v1/audio-features'
+    parameters <- list(
+        ids = paste0(ids, collapse = ','),
+        access_token = authorization
+    )
+    result <- httr::RETRY('GET', url, query = parameters, encode = 'json')
+    httr::stop_for_status(result)
+
+    result <- jsonlite::fromJSON(httr::content(result, as = 'text', encoding = 'UTF-8'), flatten = TRUE)
+    result <- result$audio_features %>% 
+    dplyr::select(
+        -type,
+        -uri,
+        -track_href,
+        -analysis_url
+    ) %>%
+    dplyr::rename(
+        track_id = id
+    )
+
+    result
+}
+
+get_genre_track_features <- function(genre, limit=20, authorization = get_spotify_access_token()){
+    tracks <- get_genre_tracks(genre, limit=limit, authorization = authorization)
+    features <- get_track_audio_features(tracks$track_id, authorization = authorization)
+
+    result <- dplyr::left_join(tracks, features, by = "track_id") %>%
+              dplyr::select(
+                -duration_ms.x
+              ) %>%
+              dplyr::rename(
+                duration_ms = duration_ms.y
+                )
+
+    result
+}
+```
+
+```{r, echo = FALSE}
+create_violin_plot_genre_danceability <- function(genres, limit=20, authorization = get_spotify_access_token()) {
+    list_df_genres <- genres %>%
+                        purrr::map(~ get_genre_track_features(.x, limit=limit, authorization=authorization) %>% mutate(genre = .x))
+
+    df_genres <- bind_rows(list_df_genres)
+
+    if (length(genres) <= 5) {
+        gg <- ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  +
+                ggplot2::geom_violin(aes(fill = genre)) +
+                labs(title = "Danceability of Genre Top Tracks", x = "Genre", y = "Danceability", fill = "Genre") +
+                theme(plot.title = element_text(hjust = 0.5)) +
+                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+    }
+    else {
+        gg <- ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  +
+                ggplot2::geom_violin(aes(fill = genre)) +
+                labs(title = "Danceability of Genre Top Tracks", x = "") +
+                theme(plot.title = element_text(hjust = 0.5),
+                        axis.text.x=element_blank(),
+                        axis.ticks.x=element_blank()
+                        ) +
+                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+    }
+    gg
+    # plotly::ggplotly(gg)
+}
+```
+
+```{r}
+# Genres
+create_violin_plot_genre_danceability(c("pop", "hip-hop", "jazz"))
+```
+
+<!-- **Valence vs. Energy Plots** -->
+
+<!-- Album, Artist, Genre -->
+
+<!-- **Radar Plots** -->
+
+<!-- Album, Artist, Genre -->
+
+<!-- **Violin Plots** -->
+
+<!-- Album, Artist, Genre -->
+
+
+# Conclusions
+
+## Further Work
+
+1.  Weather App
+2.  Youtube
+3.  Python Version
+4.  Create App to Data Base
+5.  Building Database
+6.  Write a Paper
+7.  More Conferences
+
+<!-- How did we benefit? -->
+
+<!-- DO I INCLUDE THIS? -->
+
+<!-- # Previous Presentation Outline: -->
+
+<!-- **Adam and Ken** - All started reviewing the spotifyr package code and understanding the calls and functions used. Followed up with creating a number of visualizations from the functions to see what is returned exactly and what visualizations could be created. Probably show some of the created visualizations here and explain that they are callable in the package. Then explain our work recreating and creating new functions through the api calls -->
+
+<!-- ### Understanding spotifyr package and Charlie functions -->
+
+<!-- ### Creating functions -->
+
+<!-- Adam: get_BLANK_summary, etc. -->
+
+<!-- ### Visualizations -->
+
+<!-- **Valence vs. Energy Plots** -->
+
+<!-- Album, Artist, Genre -->
+
+<!-- **Radar Plots** -->
+
+<!-- Album, Artist, Genre -->
+
+<!-- **Violin Plots** -->
+
+<!-- Album, Artist, Genre -->
+
+<!-- **Emily** - Explain her experience with creating the templates and the different iterations that to create the best template for teaching students Show each template (or the important ones) on a slide and quickly go over the pros and cons of each iteration Explain pros and cons of final template as well and its purpose for why it was chosen -->
+
+<!-- ### Creating Templates -->
+
+<!-- ## Conclusion -->
+
+<!-- Explain where future work could be done and what we particularly focused on Calls, visualizations, and joins for data science purposes Probably all on one side because there won't be too much time remaining Future work in other, potentially more complicated APIs, with using the calls and visualizations to create apps and develop websites and such -->

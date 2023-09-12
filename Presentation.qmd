@@ -1,228 +1,82 @@
 ---
 title: "Spotify API with R"
-format: revealjs
 editor: visual
+format:
+  revealjs:
+    theme: serif
 ---
 
 ```{r, echo = FALSE}
-library(quarto)
-library(tidyverse)
-library(palmerpenguins)
-library(revealjs)
-```
-
-# Introduction
-
-<!-- Intro to ourselves and the project itself Creating a package in R using the Spotify API for web developers -->
-
-## Purpose
-
-To create a curriculum about interacting with APIs from templates to understand existing functions and how to create own functions. <!-- through understanding functions and visualizations; --> <!-- for introduction data science students; -->
-
-## What We Had To Learn {.smaller}
-
-1.  Setting Up Environment (Create App from Spotify for Developers, Client ID and Secret)
-2.  Reading and Understanding Spotify R Documentation from charlie86 github
-
--   exisitng functions, how they work etc.
-
-3.  Use Github as a team of pushing, pulling, syncing, leaving notes
-4.  Creating Unique Plots (Valence vs. Energy, Radar Plot, Violin Plot) + Using Plotly for Interactivity
-5.  Utilizing ChatGPT effectively to problems solve along with Google
-6.  Working closely with a Professor weekly to schedule tasks and give updates
-
--   Figuring out direction of research and what to spend time on;
--   Delegation of tasks
-
-7.  Recreating Existing Functions and Creating New Functions (get_summary, etc.)
-8.  Creating packages and testing functions
-9.  Using R Quarto
-
-# Approaches
-
-## Just API Call {.smaller}
-
-```{r}
-# Once adam installs plotly;
-# devtools::install_github("AdamDelRio/SpotifyProject")
-```
-
-```{r, echo = FALSE}
-library(spotifyr)
-library(plotly)
-```
-
-```         
-Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-
-Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-
-access_token <- get_spotify_access_token()
+devtools::install_github("AdamDelRio/SpotifyProject")
 ```
 
 ```{r, echo = FALSE}
 Sys.setenv(SPOTIFY_CLIENT_ID = 'f995a310ad724cd49e6eb7a8736e7b19')
 Sys.setenv(SPOTIFY_CLIENT_SECRET = '9e60ab8050b945558219098bc9470925')
-
-access_token <- get_spotify_access_token()
 ```
 
-## Function with API Call {.smaller}
-
-```
-get_artist_summary <- function(id, authorization = get_spotify_access_token()){
-    artist <- get_artists(id, authorization) %>% 
-              dplyr::select(artist_name, artist_id)
-
-    features <- get_artist_audio_features(id, authorization = authorization)
-
-    songs <- features %>%
-             dplyr::mutate(num_songs = dplyr::n()) %>%
-             dplyr::select(artist_name, num_songs)
-    
-    result <- dplyr::left_join(artist, songs, by = "artist_name") %>%
-              dplyr::slice(1)
-    
-    summary <- features %>%
-               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, explicit, tempo, duration_ms, mode) %>%
-               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = mean, sd = sd), na.rm = TRUE))
-
-    result <- merge(result, summary)
-    result
-}
-```
-
-## Functions that
-
-1.  Make API Call
-2.  Performs something else
-    1.  Manipulation
-    2.  Select
-    3.  Filter
-    4.  Visualize
-
----    
-__Example: Function that Visualizes__
-```         
-create_violin_plot_album_danceability <- function(artist_id, limit = 7, authorization = get_spotify_access_token()) {
-    df_artist <- get_artist_audio_features(artist_id, authorization = authorization)
-
-    album_names <- unique(df_artist$album_name)[1:limit]
-
-    # only keep rows of data frame where album name is one of the names in album_names;
-    df_artist <- df_artist[df_artist$album_name %in% album_names, ]
-
-    # not based on size of input, but rather number of rows of df;
-    # if (nrow(df_artist) <= 5)
-    if(length(album_names) <= 5) {
-      # Can also try total characters divided by 10 to create ratio requirement; Maybe;
-      if (any(nchar(unique(df_artist$album_name)) > 10)) {
-        gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-                ggplot2::geom_violin(aes(fill = album_name)) +
-                # can use springf or paste; equivalent of {} for var in string;
-                labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") +
-                theme(plot.title = element_text(hjust = 0.5),
-                      axis.text.x=element_blank(),
-                      axis.ticks.x=element_blank()
-                      ) +
-                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-      } else {
-        gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-                ggplot2::geom_violin(aes(fill = album_name)) +
-                # can use sprintf or paste; equivalent of {} for var in string;
-                labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "Album", y = "Danceability", fill = "Album") +
-                theme(plot.title = element_text(hjust = 0.5)) +
-                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-        }
-    }
-    else {
-      gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-              ggplot2::geom_violin(aes(fill = album_name)) +
-              labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") +
-              theme(plot.title = element_text(hjust = 0.5),
-                    axis.text.x=element_blank(),
-                    axis.ticks.x=element_blank()
-                    ) +
-              stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-    }
-    plotly::ggplotly(gg)
-}
-```
-
-# Applications (RShiny)
-
-## Summaries {.smaller}
-
-__Example 1: Get Album Summary__
-```
-get_album_summary <- function(id, authorization = get_spotify_access_token()){
-    album <- get_albums(id, authorization = authorization)
-
-    tracks <- get_albums_tracks(id, authorization = authorization)
-    
-    features <- get_track_audio_features(tracks$track_id, authorization = authorization)
-    
-    summary <- features %>%
-               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo, duration_ms, mode) %>%
-               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = ~ mean(., na.rm = TRUE), sd = ~ sd(., na.rm = TRUE)), .names = "{.col}_{.fn}"))
-    
-    result <- merge(album, summary) %>% 
-              dplyr::select(-label,
-                            -release_date,
-                            -release_date_precision,
-                            -type,
-                            -artist_id,
-                            -artist_name)
-    result
-}
-```
-
-## 
-
-__Example 2: Get Artist Summary__
-```
-get_artist_summary <- function(id, authorization = get_spotify_access_token()){
-    artist <- get_artists(id, authorization) %>% 
-              dplyr::select(artist_name, artist_id)
-
-    features <- get_artist_audio_features(id, authorization = authorization)
-
-    songs <- features %>%
-             dplyr::mutate(num_songs = dplyr::n()) %>%
-             dplyr::select(artist_name, num_songs)
-    
-    result <- dplyr::left_join(artist, songs, by = "artist_name") %>%
-              dplyr::slice(1)
-    
-    summary <- features %>%
-               dplyr::select(danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, explicit, tempo, duration_ms, mode) %>%
-               dplyr::summarize(dplyr::across(dplyr::everything(), list(mean = mean, sd = sd), na.rm = TRUE))
-
-    result <- merge(result, summary)
-    result
-}
-```
-
-## Visualizations
-
-```{r}
-devtools::install_github("AdamDelRio/SpotifyProject")
-```
-
-<!-- ### Valence vs Energy Plot -->
-<!-- ```{r} -->
-<!-- create -->
-<!-- ``` -->
-
-### Violint Plot:
-
-__Example 1: Taylor Swift's Albums (Limit at 7 default; Can Change)__
 ```{r, echo = FALSE}
-create_violin_plot_album_danceability <- function(artist_id, limit = 7, authorization = get_spotify_access_token()) {
-    df_artist <- get_artist_audio_features(artist_id, authorization = authorization)
+library(quarto)
+library(tidyverse)
+library(revealjs)
+library(shiny)
+library(SpotifyProject)
+```
 
+[Try The Shiny App!](https://to2wk0-adam-del0rio.shinyapps.io/MyShinyApp/)
+
+# Introduction
+
+<!-- Intro to ourselves and the project itself Creating a package in R using the Spotify API for web developers -->
+
+What is an API?
+
+## APIs
+
+An API is a Back-end Service that Allows a User to Access Data from an Existing Database
+
+## Purpose
+
+1.  To create a curriculum about interacting with APIs
+2.  Learn about the benefits of exploring Spotify APIs
+3.  Data Science usages
+
+## Methods
+
+1.  Templates
+2.  Package
+3.  Visualizations
+
+# Results
+
+## Templates
+
+![](Spotify API Framework step 0.png)
+
+## Templates
+
+![](Spotify API Framework step 1.png)
+
+## Templates
+
+![](Spotify API Framework step 2.png)
+
+## Templates
+
+![](Spotify API Framework step 3.png)
+
+## Templates
+
+![](Spotify API Framework manipulations.png)
+
+## Visualization
+
+```         
+create_violin_plot_album_danceability <- function(query = NULL, artist_id = NULL, limit = 7, authorization = get_spotify_access_token()) {
+    df_artist <- get_artist_audio_features(query = query, id = artist_id, authorization = authorization)
+    
     album_names <- unique(df_artist$album_name)[1:limit]
-
+    
     # only keep rows of data frame where album name is one of the names in album_names;
     df_artist <- df_artist[df_artist$album_name %in% album_names, ]
 
@@ -231,189 +85,118 @@ create_violin_plot_album_danceability <- function(artist_id, limit = 7, authoriz
     if(length(album_names) <= 5) {
       # Can also try total characters divided by 10 to create ratio requirement; Maybe;
       if (any(nchar(unique(df_artist$album_name)) > 10)) {
-        gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-                ggplot2::geom_violin(aes(fill = album_name)) +
+        gg <- ggplot2::ggplot(df_artist, ggplot2::aes(x=album_name, y=danceability))  + 
+                ggplot2::geom_violin(ggplot2::aes(fill = album_name)) + 
                 # can use springf or paste; equivalent of {} for var in string;
-                labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") +
-                theme(plot.title = element_text(hjust = 0.5),
-                      axis.text.x=element_blank(),
-                      axis.ticks.x=element_blank()
-                      ) +
-                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+                ggplot2::labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") + 
+                ggplot2::theme_bw() +
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), 
+                      axis.text.x = ggplot2::element_blank(), 
+                      axis.ticks.x = ggplot2::element_blank()
+                      ) + 
+                ggplot2::stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
       } else {
-        gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-                ggplot2::geom_violin(aes(fill = album_name)) +
+        gg <- ggplot2::ggplot(df_artist, ggplot2::aes(x=album_name, y=danceability))  + 
+                ggplot2::geom_violin(ggplot2::aes(fill = album_name)) + 
                 # can use sprintf or paste; equivalent of {} for var in string;
-                labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "Album", y = "Danceability", fill = "Album") +
-                theme(plot.title = element_text(hjust = 0.5)) +
-                stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+                ggplot2::labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "Album", y = "Danceability", fill = "Album") +
+                ggplot2::theme_bw() + 
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + 
+                ggplot2::stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
         }
-    }
+    } 
     else {
-      gg <- ggplot2::ggplot(df_artist, aes(x=album_name, y=danceability))  +
-              ggplot2::geom_violin(aes(fill = album_name)) +
-              labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") +
-              theme(plot.title = element_text(hjust = 0.5),
-                    axis.text.x=element_blank(),
-                    axis.ticks.x=element_blank()
-                    ) +
-              stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+      gg <- ggplot2::ggplot(df_artist, ggplot2::aes(x=album_name, y=danceability))  + 
+              ggplot2::geom_violin(ggplot2::aes(fill = album_name)) + 
+              ggplot2::labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") + 
+              ggplot2::theme_bw() +
+              ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), 
+                    axis.text.x = ggplot2::element_blank(), 
+                    axis.ticks.x = ggplot2::element_blank()
+                    ) + 
+              ggplot2::stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
     }
-    gg
-    # plotly::ggplotly(gg)
+  plotly(gg)
 }
 ```
 
-```{r}
-create_violin_plot_album_danceability("1eYhYunlNJlDoQhtYBvPsi")
+## Visualization
+
+```{r, echo = FALSE}
+create_violin_plot_album_danceability <- function(query = NULL, artist_id = NULL, limit = 7, authorization = get_spotify_access_token()) {
+    df_artist <- get_artist_audio_features(query = query, id = artist_id, authorization = authorization)
+    
+    album_names <- unique(df_artist$album_name)[1:limit]
+    
+    # only keep rows of data frame where album name is one of the names in album_names;
+    df_artist <- df_artist[df_artist$album_name %in% album_names, ]
+
+    # not based on size of input, but rather number of rows of df;
+    # if (nrow(df_artist) <= 5)
+    if(length(album_names) <= 5) {
+      # Can also try total characters divided by 10 to create ratio requirement; Maybe;
+      if (any(nchar(unique(df_artist$album_name)) > 10)) {
+        gg <- ggplot2::ggplot(df_artist, ggplot2::aes(x=album_name, y=danceability))  + 
+                ggplot2::geom_violin(ggplot2::aes(fill = album_name)) + 
+                # can use springf or paste; equivalent of {} for var in string;
+                ggplot2::labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") + 
+                ggplot2::theme_bw() +
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), 
+                      axis.text.x = ggplot2::element_blank(), 
+                      axis.ticks.x = ggplot2::element_blank()
+                      ) + 
+                ggplot2::stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+      } else {
+        gg <- ggplot2::ggplot(df_artist, ggplot2::aes(x=album_name, y=danceability))  + 
+                ggplot2::geom_violin(ggplot2::aes(fill = album_name)) + 
+                # can use sprintf or paste; equivalent of {} for var in string;
+                ggplot2::labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "Album", y = "Danceability", fill = "Album") +
+                ggplot2::theme_bw() + 
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) + 
+                ggplot2::stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+        }
+    } 
+    else {
+      gg <- ggplot2::ggplot(df_artist, ggplot2::aes(x=album_name, y=danceability))  + 
+              ggplot2::geom_violin(ggplot2::aes(fill = album_name)) + 
+              ggplot2::labs(title = sprintf("Danceability of %s's Albums", df_artist$artist_name[1]), x = "", y = "Danceability", fill = "Album") + 
+              ggplot2::theme_bw() +
+              ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), 
+                    axis.text.x = ggplot2::element_blank(), 
+                    axis.ticks.x = ggplot2::element_blank()
+                    ) + 
+              ggplot2::stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
+    }
+  gg
+}
+
 ```
 
 ```{r, echo = TRUE}
-# Albums: Taylor Swift
-create_violin_plot_album_danceability("06HL4z0CvFAxyc27GXpf02")
+# Bruno Mars
+create_violin_plot_album_danceability(query = "Bruno Mars", limit = 4)
 ```
 
-##
-__Example 2: Taylor Swift, Kanye West, Ray Charles__
-```{r, echo = FALSE}
-create_violin_plot_artist_danceability <- function(artist_ids, authorization = get_spotify_access_token()) {
-    # Get top 10 tracks of artist:
-    list_df_artist_top_tracks <- artist_ids %>% 
-                                    purrr::map(~ get_artist_top_tracks(.x))
+<!-- through understanding functions and visualizations; -->
 
-    # From list above, pull out the song ids and make into vector:
-    vector_song_ids <- list_df_artist_top_tracks %>%
-                            map(~ .x %>% pull(id)) %>% 
-                            unlist()
+<!-- for introduction data science students; -->
 
-    # Vector of artist names:
-    # Get artist names and duplicate them
-    vector_artist_names <- artist_ids %>% 
-                                map(~ rep(get_artists(.x)$name, times = nrow(get_artist_top_tracks(.x)))) %>% 
-                                unlist()
+## What We Had To Learn {.smaller}
 
-    # Get track audio features of artist 10 songs:
-    df_tracks <- get_track_audio_features(vector_song_ids, authorization = get_spotify_access_token()) %>% 
-                    mutate(artist = vector_artist_names)
-    
-    if ((length(artist_ids) <= 3 & any(nchar(vector_artist_names) > 15) & any(nchar(vector_artist_names) < 30)) | (length(artist_ids) <= 5 & all(nchar(vector_artist_names) <= 15))) {
-        gg <- ggplot2::ggplot(df_tracks, aes(x=artist, y=danceability))  + 
-            ggplot2::geom_violin(aes(fill = artist)) + 
-            labs(title = "Danceability of Artist Top Tracks", x = "Artist", y = "Danceability", fill = "Artist") + 
-            theme(plot.title = element_text(hjust = 0.5))
-    } 
-    else {
-        gg <- ggplot2::ggplot(df_tracks, aes(x=artist, y=danceability))  + 
-            ggplot2::geom_violin(aes(fill = artist)) + 
-            labs(title = "Danceability of Artist Top Tracks", x = "") + 
-            theme(plot.title = element_text(hjust = 0.5), 
-                    axis.text.x=element_blank(), 
-                    axis.ticks.x=element_blank() 
-                    )
-    }
-    gg
-    # plotly::ggplotly(gg)
-}
-```
-
-```{r}
-# Artists: Taylor Swift, Kanye West, Ray Charles
-create_violin_plot_artist_danceability(c("06HL4z0CvFAxyc27GXpf02", "5K4W6rqBFWDnAN6FQUkS6x", "1eYhYunlNJlDoQhtYBvPsi"))
-```
-
-##
-__Example 3: pop, hip-hop, jazz__
-```{r, echo = FALSE}
-# create_violin_plot_genre_danceability <- function(genres, limit=20, authorization = get_spotify_access_token()) {
-#     list_df_genres <- genres %>% 
-#                         purrr::map(~ get_genre_track_features(.x, limit=limit, authorization=authorization) %>% mutate(genre = .x))
-#     
-#     df_genres <- bind_rows(list_df_genres)
-# 
-#     if (length(genres) <= 5) {
-#         gg <- ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  + 
-#                 ggplot2::geom_violin(aes(fill = genre)) + 
-#                 labs(title = "Danceability of Genre Top Tracks", x = "Genre", y = "Danceability", fill = "Genre") + 
-#                 theme(plot.title = element_text(hjust = 0.5)) + 
-#                 stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-#     } 
-#     else {
-#         gg <- ggplot2::ggplot(df_genres, aes(x=genre, y=danceability))  + 
-#                 ggplot2::geom_violin(aes(fill = genre)) + 
-#                 labs(title = "Danceability of Genre Top Tracks", x = "") + 
-#                 theme(plot.title = element_text(hjust = 0.5), 
-#                         axis.text.x=element_blank(), 
-#                         axis.ticks.x=element_blank()
-#                         ) + 
-#                 stat_summary(fun.data = "mean_cl_normal", geom = "point", shape = 20, size = 4, color = "red")
-#     }
-#     gg
-#     # plotly::ggplotly(gg)
-# }
-```
-
-```{r}
-# Genres
-create_violin_plot_genre_danceability(c("pop", "hip-hop", "jazz"))
-```
-
-<!-- **Valence vs. Energy Plots** -->
-
-<!-- Album, Artist, Genre -->
-
-<!-- **Radar Plots** -->
-
-<!-- Album, Artist, Genre -->
-
-<!-- **Violin Plots** -->
-
-<!-- Album, Artist, Genre -->
-
-
-# Conclusions
+1.  Setting Up Environment (Create App from Spotify for Developers, Client ID and Secret)
+2.  Reading and Understanding Spotify R Documentation from charlie86 github
+3.  Use Github as a team of pushing, pulling, syncing, leaving notes
+4.  Creating Unique Plots (Valence vs. Energy, Radar Plot, Violin Plot) + Using Plotly for Interactivity
+5.  Utilizing ChatGPT effectively to problems solve along with Google
+6.  Working closely with a Professor weekly to schedule tasks and give updates
+7.  Recreating Existing Functions (get_artists, etc.) and Creating New Functions (get_artist_summary, etc.)
+8.  Creating the package
+9.  Using R Quarto
 
 ## Further Work
 
-1.  Weather App
-2.  Youtube
+1.  Create an App Utilizing API Calls
+2.  Test Other Web APIs
 3.  Python Version
-4.  Create App to Data Base
-5.  Building Database
-6.  Write a Paper
-7.  More Conferences
-
-<!-- How did we benefit? -->
-
-<!-- DO I INCLUDE THIS? -->
-
-<!-- # Previous Presentation Outline: -->
-
-<!-- **Adam and Ken** - All started reviewing the spotifyr package code and understanding the calls and functions used. Followed up with creating a number of visualizations from the functions to see what is returned exactly and what visualizations could be created. Probably show some of the created visualizations here and explain that they are callable in the package. Then explain our work recreating and creating new functions through the api calls -->
-
-<!-- ### Understanding spotifyr package and Charlie functions -->
-
-<!-- ### Creating functions -->
-
-<!-- Adam: get_BLANK_summary, etc. -->
-
-<!-- ### Visualizations -->
-
-<!-- **Valence vs. Energy Plots** -->
-
-<!-- Album, Artist, Genre -->
-
-<!-- **Radar Plots** -->
-
-<!-- Album, Artist, Genre -->
-
-<!-- **Violin Plots** -->
-
-<!-- Album, Artist, Genre -->
-
-<!-- **Emily** - Explain her experience with creating the templates and the different iterations that to create the best template for teaching students Show each template (or the important ones) on a slide and quickly go over the pros and cons of each iteration Explain pros and cons of final template as well and its purpose for why it was chosen -->
-
-<!-- ### Creating Templates -->
-
-<!-- ## Conclusion -->
-
-<!-- Explain where future work could be done and what we particularly focused on Calls, visualizations, and joins for data science purposes Probably all on one side because there won't be too much time remaining Future work in other, potentially more complicated APIs, with using the calls and visualizations to create apps and develop websites and such -->
+4.  Write a Paper
+5.  Present at More Conferences
